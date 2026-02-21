@@ -47,22 +47,22 @@
     <template v-if="layoutType === 'multi-zone'">
       <div :style="containerStyle" class="puck-canvas-layout">
         <div
-          v-for="colIdx in columnCount"
+          v-for="(colContent, colIdx) in zoneContentMap.columns"
           :key="colIdx"
           class="puck-canvas-column"
-          :class="{ 'is-drag-over': zoneDragOver[getColumnZoneKey(colIdx - 1)] }"
-          @dragover.prevent.stop="onZoneDragOver($event, getColumnZoneKey(colIdx - 1))"
-          @dragleave.stop="onZoneDragLeave(getColumnZoneKey(colIdx - 1))"
-          @drop.prevent.stop="onZoneDrop($event, getColumnZoneKey(colIdx - 1))"
+          :class="{ 'is-drag-over': zoneDragOver[getColumnZoneKey(colIdx)] }"
+          @dragover.prevent.stop="onZoneDragOver($event, getColumnZoneKey(colIdx))"
+          @dragleave.stop="onZoneDragLeave(getColumnZoneKey(colIdx))"
+          @drop.prevent.stop="onZoneDrop($event, getColumnZoneKey(colIdx))"
         >
           <PuckCanvasItem
-            v-for="child in getZoneContent(getColumnZoneKey(colIdx - 1))"
+            v-for="child in colContent"
             :key="child.props?.id"
             :item="child"
             :config="config"
             :selected-id="selectedId"
             :hovered-id="hoveredId"
-            :zone="getColumnZoneCompound(colIdx - 1)"
+            :zone="getColumnZoneCompound(colIdx)"
             @select="emit('select', $event)"
             @hover="emit('hover', $event)"
             @deselect="emit('deselect')"
@@ -70,8 +70,8 @@
             @remove="emit('remove', $event)"
             @slot-drop="emit('slot-drop', $event)"
           />
-          <div v-if="getZoneContent(getColumnZoneKey(colIdx - 1)).length === 0" class="puck-canvas-column__empty">
-            <span>Column {{ colIdx }}</span>
+          <div v-if="colContent.length === 0" class="puck-canvas-column__empty">
+            <span>Column {{ colIdx + 1 }}</span>
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@
         @drop.prevent.stop="onZoneDrop($event, flexZoneKey)"
       >
         <PuckCanvasItem
-          v-for="child in getZoneContent(flexZoneKey)"
+          v-for="child in (zoneContentMap.flex ?? [])"
           :key="child.props?.id"
           :item="child"
           :config="config"
@@ -102,7 +102,7 @@
           @remove="emit('remove', $event)"
           @slot-drop="emit('slot-drop', $event)"
         />
-        <div v-if="getZoneContent(flexZoneKey).length === 0" class="puck-canvas-column__empty" style="width:100%">
+        <div v-if="(zoneContentMap.flex ?? []).length === 0" class="puck-canvas-column__empty" style="width:100%">
           <span>Drop components here</span>
         </div>
       </div>
@@ -254,11 +254,28 @@ const itemProps = computed(() => {
   return p
 })
 
+const zonesData = computed(() => store.state?.data?.zones || {})
+
 function getZoneContent(zoneKey: string): any[] {
   const zoneCompound = `${itemId.value}:${zoneKey}`
-  const zones = store.state?.data?.zones || {}
-  return zones[zoneCompound] || []
+  return zonesData.value[zoneCompound] || []
 }
+
+const zoneContentMap = computed(() => {
+  const zones = zonesData.value
+  if (layoutType.value === 'multi-zone') {
+    const columns: any[][] = []
+    for (let i = 0; i < columnCount.value; i++) {
+      const key = getColumnZoneKey(i)
+      columns.push(zones[`${itemId.value}:${key}`] || [])
+    }
+    return { columns }
+  }
+  if (layoutType.value === 'single-zone') {
+    return { flex: zones[`${itemId.value}:${flexZoneKey.value}`] || [] }
+  }
+  return { columns: [] as any[], flex: [] as any[] }
+})
 
 onMounted(() => {
   registerLayoutZones()
@@ -288,10 +305,12 @@ const zoneDragOver = ref<Record<string, boolean>>({})
 
 function onZoneDragOver(e: DragEvent, zoneKey: string) {
   e.dataTransfer!.dropEffect = 'copy'
+  if (zoneDragOver.value[zoneKey]) return
   zoneDragOver.value = { ...zoneDragOver.value, [zoneKey]: true }
 }
 
 function onZoneDragLeave(zoneKey: string) {
+  if (!zoneDragOver.value[zoneKey]) return
   zoneDragOver.value = { ...zoneDragOver.value, [zoneKey]: false }
 }
 
@@ -312,18 +331,19 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
 }
 
 watch(isSelected, (selected) => {
-  if (selected) nextTick(() => updateActionsPortalPosition())
+  if (selected) {
+    nextTick(() => updateActionsPortalPosition())
+    document.addEventListener('scroll', onScrollOrResize, true)
+    window.addEventListener('resize', onScrollOrResize)
+  } else {
+    document.removeEventListener('scroll', onScrollOrResize, true)
+    window.removeEventListener('resize', onScrollOrResize)
+  }
 }, { immediate: true })
 
 function onScrollOrResize() {
-  if (isSelected.value) updateActionsPortalPosition()
+  if (itemRef.value && isSelected.value) updateActionsPortalPosition()
 }
-
-onMounted(() => {
-  if (isSelected.value) nextTick(() => updateActionsPortalPosition())
-  document.addEventListener('scroll', onScrollOrResize, true)
-  window.addEventListener('resize', onScrollOrResize)
-})
 
 onBeforeUnmount(() => {
   document.removeEventListener('scroll', onScrollOrResize, true)

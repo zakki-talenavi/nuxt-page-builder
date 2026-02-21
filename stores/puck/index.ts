@@ -181,11 +181,15 @@ export const usePuckStore = defineStore('puck', {
     },
 
     dispatch(action: PuckAction) {
-      const record = debounce((appState: AppState) => {
-        const history = { state: appState, id: generateId('history') }
-        this.histories = [...this.histories.slice(0, this.historyIndex + 1), history]
-        this.historyIndex = this.histories.length - 1
-      }, 250)
+      const self = this
+      if (!(self as any)._recordHistoryDebounced) {
+        (self as any)._recordHistoryDebounced = debounce((appState: AppState) => {
+          const history = { state: appState, id: generateId('history') }
+          self.histories = [...self.histories.slice(0, self.historyIndex + 1), history]
+          self.historyIndex = self.histories.length - 1
+        }, 250)
+      }
+      const record = (self as any)._recordHistoryDebounced
 
       const reducer = createReducer({
         record,

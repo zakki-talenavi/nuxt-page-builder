@@ -132,8 +132,8 @@ const rootTitle = computed(() => rootProps.value?.title || '')
 const selectedItem = computed(() => store.selectedItem)
 const selectedId = computed(() => selectedItem.value?.props?.id || null)
 
-const canUndo = computed(() => store.history.hasPast())
-const canRedo = computed(() => store.history.hasFuture())
+const canUndo = computed(() => store.historyIndex > 0)
+const canRedo = computed(() => store.historyIndex < store.histories.length - 1)
 
 const componentList = computed(() =>
   Object.entries(store.config?.components || {}).map(([key, cfg]: [string, any]) => ({
@@ -142,13 +142,19 @@ const componentList = computed(() =>
   }))
 )
 
-const jsonData = computed(() => ({
-  root: store.state?.data?.root,
-  content: store.state?.data?.content || [],
-  zones: store.state?.data?.zones || {},
-}))
+const jsonData = computed(() =>
+  showJsonPanel.value
+    ? {
+        root: store.state?.data?.root,
+        content: store.state?.data?.content || [],
+        zones: store.state?.data?.zones || {},
+      }
+    : { root: null, content: [], zones: {} }
+)
 
-const formattedJson = computed(() => JSON.stringify(jsonData.value, null, 2))
+const formattedJson = computed(() =>
+  showJsonPanel.value ? JSON.stringify(jsonData.value, null, 2) : ''
+)
 
 function copyJson() {
   navigator.clipboard.writeText(formattedJson.value).then(() => {

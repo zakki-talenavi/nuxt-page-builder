@@ -170,6 +170,15 @@ const frameStyle = computed(() => {
 })
 
 let ro: ResizeObserver | null = null
+let resizeRaf: number | null = null
+
+function throttledAutoFitZoom() {
+  if (resizeRaf != null) return
+  resizeRaf = requestAnimationFrame(() => {
+    resizeRaf = null
+    if (currentViewport.value.width !== '100%') autoFitZoom()
+  })
+}
 
 /** Select closest viewport to window width on load (per puck-main) */
 function selectClosestViewport() {
@@ -199,14 +208,13 @@ onMounted(() => {
     autoFitZoom()
   })
   if (scrollAreaRef.value) {
-    ro = new ResizeObserver(() => {
-      if (currentViewport.value.width !== '100%') autoFitZoom()
-    })
+    ro = new ResizeObserver(throttledAutoFitZoom)
     ro.observe(scrollAreaRef.value)
   }
 })
 
 onBeforeUnmount(() => {
+  if (resizeRaf != null) cancelAnimationFrame(resizeRaf)
   ro?.disconnect()
 })
 
