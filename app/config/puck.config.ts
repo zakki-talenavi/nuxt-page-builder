@@ -141,34 +141,8 @@ const RichTextBlock = defineComponent({
   },
 })
 
-// ── Button ──
-
-const ButtonBlock = defineComponent({
-  name: 'ButtonBlock',
-  props: {
-    label: { type: String, default: 'Button' },
-    href: { type: String, default: '#' },
-    variant: { type: String, default: 'primary' },
-  },
-  setup(props) {
-    return () => {
-      const isPrimary = props.variant !== 'secondary'
-      return h('div', { style: { padding: '8px 0' } }, [
-        h('a', {
-          href: props.href,
-          style: {
-            display: 'inline-block', padding: '12px 24px',
-            background: isPrimary ? '#6366f1' : '#fff',
-            color: isPrimary ? '#fff' : '#6366f1',
-            border: isPrimary ? 'none' : '2px solid #6366f1',
-            borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '14px',
-            cursor: 'pointer', transition: 'all 0.15s',
-          },
-        }, props.label),
-      ])
-    }
-  },
-})
+// ── Button (Vue SFC: link + custom modal) ──
+import ButtonBlockVue from '@@/components/puck/blocks/ButtonBlock.vue'
 
 // ── Card ──
 
@@ -502,16 +476,45 @@ export const puckConfig = {
     },
     Button: {
       label: 'Button',
-      defaultProps: { label: 'Button', href: '#', variant: 'primary' },
+      defaultProps: {
+        label: 'Button',
+        href: '#',
+        variant: 'primary',
+        actionType: 'link',
+        modalTitle: '',
+        modalContentType: 'richtext',
+        modalContent: '<p>Isi modal di sini.</p>',
+        formId: '',
+      },
       fields: {
         label: { type: 'text', label: 'Label' },
-        href: { type: 'text', label: 'URL' },
+        actionType: {
+          type: 'radio',
+          label: 'Aksi',
+          options: [
+            { label: 'Link (ke URL)', value: 'link' },
+            { label: 'Buka modal', value: 'modal' },
+          ],
+        },
+        href: { type: 'text', label: 'URL (untuk link)' },
         variant: {
-          type: 'radio', label: 'Variant',
+          type: 'radio',
+          label: 'Variant',
           options: [{ label: 'Primary', value: 'primary' }, { label: 'Secondary', value: 'secondary' }],
         },
+        modalTitle: { type: 'text', label: 'Judul modal' },
+        modalContentType: {
+          type: 'radio',
+          label: 'Tipe konten modal',
+          options: [
+            { label: 'Rich text', value: 'richtext' },
+            { label: 'Form (dari Form Builder)', value: 'form' },
+          ],
+        },
+        modalContent: { type: 'richtext', label: 'Konten modal (untuk rich text)' },
+        formId: { type: 'text', label: 'ID Form (dari Form Builder)' },
       },
-      render: markRaw(ButtonBlock),
+      render: markRaw(ButtonBlockVue),
     },
     Card: {
       label: 'Card',
