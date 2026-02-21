@@ -322,7 +322,18 @@ function handleDrop(e: DragEvent) {
   flex: 1;
   overflow: auto;
   padding: 0;
+  padding-top: calc(var(--puck-space-px, 16px) * 0.75);
   min-width: 0;
+}
+@media (min-width: 640px) {
+  .puck-canvas__scroll {
+    padding-top: var(--puck-space-px, 16px);
+  }
+}
+@media (min-width: 1198px) {
+  .puck-canvas__scroll {
+    padding-top: calc(var(--puck-space-px, 16px) * 1.25);
+  }
 }
 
 .puck-canvas__frame {
