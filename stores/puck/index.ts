@@ -170,6 +170,26 @@ export const usePuckStore = defineStore('puck', {
         baseState.indexes = { nodes: {}, zones: {} }
       }
 
+      const categories = (this.config as any).categories
+      if (categories && typeof categories === 'object') {
+        const existingList = baseState.ui.componentList || {}
+        baseState.ui = {
+          ...baseState.ui,
+          componentList: Object.entries(categories).reduce(
+            (acc, [categoryKey, category]: [string, any]) => ({
+              ...acc,
+              [categoryKey]: {
+                title: category?.title ?? categoryKey,
+                components: category?.components ?? [],
+                expanded: category?.defaultExpanded ?? true,
+                visible: category?.visible ?? true,
+              },
+            }),
+            { ...existingList }
+          ),
+        }
+      }
+
       this.state = walkAppState(baseState as any, this.config) as PrivateAppState
       this.initialAppState = this.state
       this.histories = [{ state: makeStatePublic(this.state as any), id: generateId('history') }]
