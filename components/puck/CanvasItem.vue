@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="itemRef"
     class="puck-canvas-item"
     :class="{
       'is-selected': isSelected,
@@ -10,31 +11,37 @@
     @mouseenter="emit('hover', item.props?.id)"
     @mouseleave="emit('hover', null)"
   >
-    <div v-if="isSelected" class="puck-canvas-item__actions">
-      <span class="puck-canvas-item__label">{{ label }}</span>
-      <button
-        v-if="canDuplicate"
-        class="puck-action-btn"
-        @click.stop="emit('duplicate', item.props?.id)"
-        title="Duplicate"
+    <!-- Toolbar di portal ke body agar tidak tertutup parent/utama -->
+    <Teleport v-if="isSelected" to="body">
+      <div
+        class="puck-canvas-item__actions puck-canvas-item__actions--portal"
+        :style="actionsPortalStyle"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="9" y="9" width="13" height="13" rx="2" />
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-        </svg>
-      </button>
-      <button
-        v-if="canDeleteItem"
-        class="puck-action-btn puck-action-btn--danger"
-        @click.stop="emit('remove', item.props?.id)"
-        title="Delete"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        </svg>
-      </button>
-    </div>
+        <span class="puck-canvas-item__label">{{ label }}</span>
+        <button
+          v-if="canDuplicate"
+          class="puck-action-btn"
+          @click.stop="emit('duplicate', item.props?.id)"
+          title="Duplicate"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+        <button
+          v-if="canDeleteItem"
+          class="puck-action-btn puck-action-btn--danger"
+          @click.stop="emit('remove', item.props?.id)"
+          title="Delete"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+        </button>
+      </div>
+    </Teleport>
 
     <!-- Multi-zone layout (Columns / Grid): one drop zone per column -->
     <template v-if="layoutType === 'multi-zone'">
@@ -141,10 +148,23 @@ const emit = defineEmits<{
   (e: 'slot-drop', payload: { componentType?: string; moveId?: string; zone: string; index: number }): void
 }>()
 
+const itemRef = ref<HTMLElement | null>(null)
+const actionsPortalStyle = ref<{ top: string; left: string }>({ top: '0', left: '0' })
+
 const isSelected = computed(() => props.selectedId === props.item.props?.id)
 const isHovered = computed(() => props.hoveredId === props.item.props?.id)
 
 const label = computed(() => props.config?.components?.[props.item.type]?.label || props.item.type)
+
+function updateActionsPortalPosition() {
+  const el = itemRef.value
+  if (!el || !isSelected.value) return
+  const rect = el.getBoundingClientRect()
+  actionsPortalStyle.value = {
+    top: `${rect.top - 40}px`,
+    left: `${rect.left + rect.width / 2}px`,
+  }
+}
 const renderer = computed(() => props.config?.components?.[props.item.type]?.render || null)
 
 const canDuplicate = computed(() => store.getPermissions({ item: props.item })?.duplicate !== false)
@@ -290,29 +310,77 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
     emit('slot-drop', { componentType, zone: zoneCompound, index })
   }
 }
+
+watch(isSelected, (selected) => {
+  if (selected) nextTick(() => updateActionsPortalPosition())
+}, { immediate: true })
+
+function onScrollOrResize() {
+  if (isSelected.value) updateActionsPortalPosition()
+}
+
+onMounted(() => {
+  if (isSelected.value) nextTick(() => updateActionsPortalPosition())
+  document.addEventListener('scroll', onScrollOrResize, true)
+  window.addEventListener('resize', onScrollOrResize)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('scroll', onScrollOrResize, true)
+  window.removeEventListener('resize', onScrollOrResize)
+})
 </script>
 
 <style scoped>
 .puck-canvas-item {
   position: relative;
+  z-index: 0;
   background: #fff;
   border-radius: 6px;
   margin-bottom: 8px;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, z-index 0s;
   min-width: 0;
   max-width: 100%;
 }
 .puck-canvas-item:hover,
-.puck-canvas-item.is-hovered { border-color: #c7d2fe; }
-.puck-canvas-item.is-selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+.puck-canvas-item.is-hovered {
+  border-color: #c7d2fe;
+  z-index: 2;
+}
+.puck-canvas-item.is-selected {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  z-index: 3;
+}
+
+/* Toolbar (top: -36px) jangan tertutup item di bawah: item yang persis di atas item terpilih naik z-index */
+.puck-canvas-item:has(+ .puck-canvas-item.is-selected) {
+  z-index: 4;
+}
 
 .puck-canvas-item__actions {
-  position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 2px; padding: 4px 6px;
-  background: #6366f1; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  z-index: 10; white-space: nowrap;
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  background: #6366f1;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 20;
+  white-space: nowrap;
+}
+
+/* Toolbar yang di-Teleport ke body: fixed agar tidak tertutup parent */
+.puck-canvas-item__actions--portal {
+  position: fixed;
+  transform: translate(-50%, 0);
+  z-index: 9999;
 }
 .puck-canvas-item__label { font-size: 11px; font-weight: 600; color: #fff; padding: 0 6px; }
 .puck-action-btn {
@@ -342,7 +410,13 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
   padding: 8px;
   transition: all 0.15s;
   background: #fafbfc;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+.puck-canvas-column:has(.puck-canvas-item.is-selected),
+.puck-canvas-column:has(.puck-canvas-item.is-hovered) {
+  z-index: 1;
 }
 .puck-canvas-column.is-drag-over {
   background: rgba(99, 102, 241, 0.05);
@@ -358,7 +432,16 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
   border: 2px dashed #e5e7eb;
   border-radius: 8px;
   background: #fafbfc;
+  padding: 8px;
+  min-height: 60px;
   transition: all 0.15s;
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+.puck-canvas-flex-zone:has(.puck-canvas-item.is-selected),
+.puck-canvas-flex-zone:has(.puck-canvas-item.is-hovered) {
+  z-index: 1;
 }
 .puck-canvas-flex-zone.is-drag-over {
   background: rgba(99, 102, 241, 0.05);
