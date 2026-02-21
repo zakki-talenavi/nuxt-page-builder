@@ -23,21 +23,30 @@
         </button>
       </div>
       <div class="puck-canvas__zoom">
-        <button class="puck-zoom-btn" @click="zoomOut" :disabled="zoomLevel <= 25" title="Zoom out">
+        <button class="puck-zoom-btn" @click="zoomOut" :disabled="zoomOutDisabled" title="Zoom out">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <span class="puck-zoom-value">{{ zoomLevel }}%</span>
-        <button class="puck-zoom-btn" @click="zoomIn" :disabled="zoomLevel >= 200" title="Zoom in">
+        <button class="puck-zoom-btn" @click="zoomIn" :disabled="zoomInDisabled" title="Zoom in">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <button class="puck-zoom-btn" @click="resetZoom" title="Reset zoom">
+        <select
+          class="puck-zoom-select"
+          :value="zoomLevel"
+          title="Zoom level"
+          @change="onZoomSelect($event)"
+        >
+          <option v-for="opt in zoomSelectOptions" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+        <button class="puck-zoom-btn" @click="resetZoom" title="Fit / reset zoom">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- Scrollable canvas area -->
-    <div ref="scrollAreaRef" class="puck-canvas__scroll" @dragover.prevent @drop.prevent="handleDrop">
+    <!-- Scrollable canvas area: min-width at 100% zoom so Large doesn't scroll -->
+    <div ref="scrollAreaRef" class="puck-canvas__scroll" :style="scrollAreaStyle" @dragover.prevent @drop.prevent="handleDrop">
       <div
         class="puck-canvas__frame"
         :style="frameStyle"
@@ -113,20 +122,49 @@ const viewports = [
   { width: '100%' as const, height: 'auto' as const, label: 'Full-width' },
 ]
 
+/* Zoom steps aligned with puck-main ViewportControls (25%–200%) */
+const ZOOM_OPTIONS = [25, 50, 75, 100, 125, 150, 200]
+const MIN_ZOOM = ZOOM_OPTIONS[0]!
+const MAX_ZOOM = ZOOM_OPTIONS[ZOOM_OPTIONS.length - 1]!
+
 const currentViewport = ref(viewports[3])
 const zoomLevel = ref(100)
+
+/** Options for dropdown: fixed steps + current value as "(Auto)" if not in list */
+const zoomSelectOptions = computed(() => {
+  const current = zoomLevel.value
+  const inList = ZOOM_OPTIONS.includes(current)
+  const base = ZOOM_OPTIONS.map((v) => ({ value: v, label: `${v}%` }))
+  if (!inList && current >= MIN_ZOOM && current <= MAX_ZOOM) {
+    base.push({ value: current, label: `${current}% (Auto)` })
+    base.sort((a, b) => a.value - b.value)
+  }
+  return base
+})
+
+const zoomOutDisabled = computed(() => zoomLevel.value <= MIN_ZOOM)
+const zoomInDisabled = computed(() => zoomLevel.value >= MAX_ZOOM)
 
 function setViewport(vp: typeof viewports[number]) {
   currentViewport.value = vp
   nextTick(() => autoFitZoom())
 }
 
+/** Zoom in: next step (like puck-main) */
 function zoomIn() {
-  zoomLevel.value = Math.min(zoomLevel.value + 10, 200)
+  const next = ZOOM_OPTIONS.find((v) => v > zoomLevel.value)
+  zoomLevel.value = next ?? MAX_ZOOM
 }
 
+/** Zoom out: previous step (like puck-main) */
 function zoomOut() {
-  zoomLevel.value = Math.max(zoomLevel.value - 10, 25)
+  const prev = [...ZOOM_OPTIONS].reverse().find((v) => v < zoomLevel.value)
+  zoomLevel.value = prev ?? MIN_ZOOM
+}
+
+function onZoomSelect(e: Event) {
+  const v = Number((e.target as HTMLSelectElement).value)
+  if (!Number.isNaN(v)) zoomLevel.value = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, v))
 }
 
 function resetZoom() {
@@ -140,7 +178,10 @@ function autoFitZoom() {
   if (w === '100%') { zoomLevel.value = 100; return }
   const available = el.clientWidth - 48
   const ratio = Math.min(available / (w as number), 1)
-  zoomLevel.value = Math.round(ratio * 100)
+  const percent = Math.round(ratio * 100)
+  zoomLevel.value = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, percent))
+  lastScrollAreaWidth = el.clientWidth
+  lastScrollAreaHeight = el.clientHeight
 }
 
 const viewportBreakpoint = computed(() => {
@@ -164,19 +205,47 @@ const frameStyle = computed(() => {
   const scale = zoomLevel.value / 100
   return {
     transform: `scale(${scale})`,
-    transformOrigin: 'top center',
+    transformOrigin: 'center center',
     width: scale < 1 ? `${100 / scale}%` : '100%',
+    transition: 'transform 150ms ease-out',
   }
 })
 
+/** At 100% zoom, give scroll area min-width = viewport width so Large (1280px) doesn't scroll */
+const scrollAreaStyle = computed(() => {
+  const w = currentViewport.value?.width
+  if (zoomLevel.value !== 100 || w === '100%' || typeof w !== 'number') return undefined
+  return { minWidth: `${w}px` }
+})
+
+/** Setelah zoom, geser scroll agar fokus ke tengah frame */
+function scrollToCenter() {
+  const scrollEl = scrollAreaRef.value
+  const frameEl = scrollEl?.firstElementChild as HTMLElement | null
+  if (!scrollEl || !frameEl) return
+  const viewW = scrollEl.clientWidth
+  const viewH = scrollEl.clientHeight
+  const frameW = frameEl.offsetWidth
+  const frameH = frameEl.offsetHeight
+  scrollEl.scrollLeft = Math.max(0, (frameW - viewW) / 2)
+  scrollEl.scrollTop = Math.max(0, (frameH - viewH) / 2)
+}
+
 let ro: ResizeObserver | null = null
 let resizeRaf: number | null = null
+let lastScrollAreaWidth = 0
+let lastScrollAreaHeight = 0
 
 function throttledAutoFitZoom() {
   if (resizeRaf != null) return
   resizeRaf = requestAnimationFrame(() => {
     resizeRaf = null
-    if (currentViewport.value.width !== '100%') autoFitZoom()
+    const el = scrollAreaRef.value
+    if (!el || currentViewport.value.width === '100%') return
+    const w = el.clientWidth
+    const h = el.clientHeight
+    if (w === lastScrollAreaWidth && h === lastScrollAreaHeight) return
+    autoFitZoom()
   })
 }
 
@@ -201,11 +270,16 @@ function selectClosestViewport() {
   }
 }
 
+watch(zoomLevel, () => {
+  nextTick(() => scrollToCenter())
+})
+
 onMounted(() => {
   selectClosestViewport()
   nextTick(() => {
     selectClosestViewport()
     autoFitZoom()
+    scrollToCenter()
   })
   if (scrollAreaRef.value) {
     ro = new ResizeObserver(throttledAutoFitZoom)
@@ -309,14 +383,20 @@ function handleDrop(e: DragEvent) {
 }
 .puck-zoom-btn:hover:not(:disabled) { background: #fff; color: #374151; }
 .puck-zoom-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.puck-zoom-value {
+.puck-zoom-select {
   font-size: 12px;
   font-weight: 600;
   color: #374151;
-  min-width: 40px;
-  text-align: center;
-  user-select: none;
+  background: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  min-width: 72px;
+  cursor: pointer;
+  appearance: auto;
 }
+.puck-zoom-select:hover { background: #f9fafb; }
+.puck-zoom-select:focus { outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3); }
 
 .puck-canvas__scroll {
   flex: 1;
