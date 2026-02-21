@@ -61,7 +61,7 @@
 
     <div v-if="activeTab === 'outline'" class="puck-sidebar__content">
       <PuckLayerTree
-        :items="items"
+        :items="outlineTree"
         :selected-id="selectedId"
         :hovered-id="null"
         :config="store.config"
@@ -77,7 +77,8 @@ import { usePuckStore } from '@@/stores/puck'
 
 const props = defineProps<{
   componentList: { key: string; label: string }[]
-  items: any[]
+  /** Tree for outline (root + nested zone children), same structure as canvas */
+  outlineTree: { type: string; props?: { id?: string }; children?: any[] }[]
   selectedId: string | null
   activeTab: string
 }>()

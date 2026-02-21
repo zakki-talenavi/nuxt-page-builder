@@ -33,7 +33,7 @@
       <div class="puck-body">
         <PuckLeftSidebar
           :component-list="componentList"
-          :items="items"
+          :outline-tree="outlineTree"
           :selected-id="selectedId"
           :active-tab="activeLeftTab"
           @update:active-tab="activeLeftTab = $event"
@@ -126,6 +126,39 @@ onMounted(() => {
 })
 
 const items = computed(() => store.state?.data?.content || [])
+
+/** Tree for outline: same hierarchy as canvas (root content + zone children for Flex/Grid/Columns) */
+type OutlineNode = { type: string; props?: { id?: string }; children?: OutlineNode[] }
+function buildOutlineTree(content: any[], zones: Record<string, any[]>): OutlineNode[] {
+  if (!content?.length) return []
+  return content.map((item) => {
+    const id = item.props?.id
+    const type = item.type
+    let childList: any[] = []
+    if (type === 'Columns' || type === 'Grid') {
+      const numCols = type === 'Columns'
+        ? (parseInt(String(item.props?.columns), 10) || 2)
+        : (item.props?.numColumns ?? 4)
+      for (let i = 0; i < numCols; i++) {
+        const zoneKey = `${id}:column-${i}`
+        childList = childList.concat(zones[zoneKey] || [])
+      }
+    } else if (type === 'Flex') {
+      childList = zones[`${id}:flex-zone`] || []
+    }
+    return {
+      type: item.type,
+      props: item.props,
+      children: buildOutlineTree(childList, zones),
+    }
+  })
+}
+const outlineTree = computed(() => {
+  const content = store.state?.data?.content || []
+  const zones = store.state?.data?.zones || {}
+  return buildOutlineTree(content, zones)
+})
+
 const rootProps = computed(() => store.state?.data?.root?.props || store.state?.data?.root || {})
 const rootTitle = computed(() => rootProps.value?.title || '')
 

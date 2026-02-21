@@ -1,25 +1,37 @@
 <template>
   <div class="puck-layer-tree">
     <div v-if="!items.length" class="puck-layer-tree__empty">No components added yet</div>
-    <div
-      v-for="(item, idx) in items"
-      :key="item.props?.id"
-      class="puck-layer-tree__item"
-      :class="{
-        'is-selected': selectedId === item.props?.id,
-        'is-hovered': hoveredId === item.props?.id
-      }"
-      :style="{ paddingLeft: `${depth * 16 + 8}px` }"
-      @click.stop="$emit('select', item.props?.id)"
-      @mouseenter="$emit('hover', item.props?.id)"
-      @mouseleave="$emit('hover', null)"
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-      </svg>
-      <span class="puck-layer-tree__label">{{ getLabel(item.type) }}</span>
-      <span class="puck-layer-tree__type">{{ item.type }}</span>
-    </div>
+    <template v-for="(item, idx) in items" :key="item.props?.id ?? `outline-${depth}-${idx}`">
+      <div class="puck-layer-tree__row">
+        <div
+          class="puck-layer-tree__item"
+          :class="{
+            'is-selected': selectedId === item.props?.id,
+            'is-hovered': hoveredId === item.props?.id
+          }"
+          :style="{ paddingLeft: `${depth * 16 + 8}px` }"
+          @click.stop="$emit('select', item.props?.id)"
+          @mouseenter="$emit('hover', item.props?.id)"
+          @mouseleave="$emit('hover', null)"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+          </svg>
+          <span class="puck-layer-tree__label">{{ getLabel(item.type) }}</span>
+          <span class="puck-layer-tree__type">{{ item.type }}</span>
+        </div>
+        <PuckLayerTree
+          v-if="item.children?.length"
+          :items="item.children"
+          :selected-id="selectedId"
+          :hovered-id="hoveredId"
+          :config="config"
+          :depth="depth + 1"
+          @select="$emit('select', $event)"
+          @hover="$emit('hover', $event)"
+        />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -46,6 +58,7 @@ function getLabel(type: string) {
 
 <style scoped>
 .puck-layer-tree { display: flex; flex-direction: column; }
+.puck-layer-tree__row { display: contents; }
 .puck-layer-tree__empty { color: #9ca3af; font-size: 13px; text-align: center; padding: 24px 12px; }
 .puck-layer-tree__item {
   display: flex; align-items: center; gap: 6px; padding: 5px 8px;
