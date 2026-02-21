@@ -8,7 +8,26 @@
       @redo="store.historyForward()"
       @publish="handlePublish"
       @toggle-json="showJsonPanel = !showJsonPanel"
+      @open-help="showHelpModal = true"
     />
+
+    <PuckModal v-model="showHelpModal" title="Bantuan" :max-width="480">
+      <div class="puck-help-content">
+        <p class="puck-help-intro">Editor visual untuk menyusun halaman dengan komponen.</p>
+        <h4>Shortcut</h4>
+        <ul>
+          <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> — Undo</li>
+          <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> — Redo</li>
+        </ul>
+        <h4>Cara pakai</h4>
+        <ul>
+          <li>Drag komponen dari panel kiri ke canvas atau ke dalam Grid / Flex / Columns.</li>
+          <li>Klik komponen untuk mengedit properti di panel kanan.</li>
+          <li>Gunakan tombol JSON untuk melihat struktur data.</li>
+          <li>Klik Publish untuk menyimpan ke localStorage dan lihat hasil di halaman View.</li>
+        </ul>
+      </div>
+    </PuckModal>
 
     <PuckDragDropContext>
       <div class="puck-body">
@@ -99,6 +118,7 @@ const showPageFields = ref(true)
 const hoveredId = ref<string | null>(null)
 const showJsonPanel = ref(false)
 const copyLabel = ref('Copy')
+const showHelpModal = ref(false)
 
 onMounted(() => {
   store.init({ config: props.config, data: props.data, metadata: props.metadata })
@@ -288,6 +308,13 @@ function handlePublish() {
   flex: 1;
   min-height: 0;
 }
+
+.puck-help-content { font-size: 14px; line-height: 1.6; color: #374151; }
+.puck-help-content .puck-help-intro { margin: 0 0 16px; }
+.puck-help-content h4 { margin: 16px 0 8px; font-size: 13px; font-weight: 600; color: #1f2937; text-transform: uppercase; letter-spacing: 0.03em; }
+.puck-help-content ul { margin: 0; padding-left: 20px; }
+.puck-help-content li { margin: 4px 0; }
+.puck-help-content kbd { padding: 2px 6px; font-size: 12px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; }
 
 .puck-json-panel {
   flex: 1;

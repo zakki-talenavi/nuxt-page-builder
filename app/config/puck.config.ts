@@ -1,4 +1,4 @@
-import { h, defineComponent } from 'vue'
+import { h, defineComponent, markRaw } from 'vue'
 
 const spacingOptions = [
   { label: '0px', value: '0px' },
@@ -444,7 +444,7 @@ export const puckConfig = {
           },
         },
       },
-      render: HeroBlock,
+      render: markRaw(HeroBlock),
     },
     Heading: {
       label: 'Heading',
@@ -467,7 +467,7 @@ export const puckConfig = {
         },
         padding: { type: 'select', label: 'Padding', options: spacingOptions },
       },
-      render: HeadingBlock,
+      render: markRaw(HeadingBlock),
     },
     Text: {
       label: 'Text',
@@ -489,7 +489,7 @@ export const puckConfig = {
         maxWidth: { type: 'text', label: 'Max Width' },
         padding: { type: 'select', label: 'Padding', options: spacingOptions },
       },
-      render: TextBlock,
+      render: markRaw(TextBlock),
     },
     RichText: {
       label: 'Rich Text',
@@ -498,7 +498,7 @@ export const puckConfig = {
         richtext: { type: 'richtext', label: 'Content' },
         padding: { type: 'select', label: 'Padding', options: spacingOptions },
       },
-      render: RichTextBlock,
+      render: markRaw(RichTextBlock),
     },
     Button: {
       label: 'Button',
@@ -511,7 +511,7 @@ export const puckConfig = {
           options: [{ label: 'Primary', value: 'primary' }, { label: 'Secondary', value: 'secondary' }],
         },
       },
-      render: ButtonBlock,
+      render: markRaw(ButtonBlock),
     },
     Card: {
       label: 'Card',
@@ -533,7 +533,7 @@ export const puckConfig = {
           options: [{ label: 'Card', value: 'card' }, { label: 'Flat', value: 'flat' }],
         },
       },
-      render: CardBlock,
+      render: markRaw(CardBlock),
     },
     Image: {
       label: 'Image',
@@ -542,7 +542,7 @@ export const puckConfig = {
         url: { type: 'text', label: 'Image URL' },
         alt: { type: 'text', label: 'Alt Text' },
       },
-      render: ImageBlock,
+      render: markRaw(ImageBlock),
     },
     Grid: {
       label: 'Grid',
@@ -551,7 +551,7 @@ export const puckConfig = {
         numColumns: { type: 'number', label: 'Columns', min: 1, max: 12 },
         gap: { type: 'number', label: 'Gap (px)', min: 0 },
       },
-      render: GridBlock,
+      render: markRaw(GridBlock),
     },
     Flex: {
       label: 'Flex',
@@ -571,7 +571,7 @@ export const puckConfig = {
           options: [{ label: 'Wrap', value: 'wrap' }, { label: 'No wrap', value: 'nowrap' }],
         },
       },
-      render: FlexBlock,
+      render: markRaw(FlexBlock),
     },
     Columns: {
       label: 'Columns',
@@ -588,7 +588,7 @@ export const puckConfig = {
         },
         gap: { type: 'number', label: 'Gap (px)' },
       },
-      render: ColumnsBlock,
+      render: markRaw(ColumnsBlock),
     },
     Space: {
       label: 'Space',
@@ -600,7 +600,7 @@ export const puckConfig = {
           options: [{ label: 'Both', value: '' }, { label: 'Vertical', value: 'vertical' }, { label: 'Horizontal', value: 'horizontal' }],
         },
       },
-      render: SpaceBlock,
+      render: markRaw(SpaceBlock),
     },
     Logos: {
       label: 'Logos',
@@ -621,7 +621,7 @@ export const puckConfig = {
           },
         },
       },
-      render: LogosBlock,
+      render: markRaw(LogosBlock),
     },
     Stats: {
       label: 'Stats',
@@ -641,7 +641,7 @@ export const puckConfig = {
           },
         },
       },
-      render: StatsBlock,
+      render: markRaw(StatsBlock),
     },
     Divider: {
       label: 'Divider',
@@ -654,13 +654,13 @@ export const puckConfig = {
         },
         margin: { type: 'select', label: 'Margin', options: spacingOptions },
       },
-      render: DividerBlock,
+      render: markRaw(DividerBlock),
     },
     Blank: {
       label: 'Blank',
       defaultProps: {},
       fields: {},
-      render: BlankBlock,
+      render: markRaw(BlankBlock),
     },
   },
   root: {

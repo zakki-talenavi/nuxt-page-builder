@@ -15,6 +15,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-2.6-6.4L21 9"/></svg>
       </button>
       <div class="puck-header__divider" />
+      <button class="puck-btn puck-btn--ghost" @click="$emit('openHelp')" title="Bantuan & shortcut">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Bantuan
+      </button>
       <button class="puck-btn puck-btn--outline" @click="$emit('toggleJson')" title="View JSON Schema">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h1"/><path d="M16 3h1a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-1"/><path d="M12 8v4l2 2"/></svg>
         JSON
@@ -35,6 +39,7 @@ defineEmits<{
   (e: 'redo'): void
   (e: 'publish'): void
   (e: 'toggleJson'): void
+  (e: 'openHelp'): void
 }>()
 </script>
 

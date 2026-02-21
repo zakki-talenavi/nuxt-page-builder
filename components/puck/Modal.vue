@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="puck-modal">
-      <div v-if="modelValue" class="puck-modal-overlay" @click.self="close">
+      <div v-if="modelValue" class="puck-modal-overlay" @click.self="close" v-bind="modalAttrs">
         <div class="puck-modal" :style="{ maxWidth: maxWidth + 'px' }">
           <div class="puck-modal__header">
             <h3 class="puck-modal__title">{{ title }}</h3>
@@ -18,12 +18,15 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false })
+
 withDefaults(defineProps<{
   modelValue: boolean
   title?: string
   maxWidth?: number
 }>(), { title: '', maxWidth: 560 })
 
+const modalAttrs = useAttrs()
 const emit = defineEmits<{ (e: 'update:modelValue', val: boolean): void }>()
 function close() { emit('update:modelValue', false) }
 </script>
