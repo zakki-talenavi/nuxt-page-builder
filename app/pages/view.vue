@@ -35,8 +35,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.puck-view { max-width: 960px; margin: 0 auto; }
-.puck-view__empty { padding: 48px; text-align: center; color: #6b7280; }
+.puck-view {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+  overflow-x: hidden;
+}
+@media (min-width: 640px) {
+  .puck-view { padding: 24px; }
+}
+.puck-view__empty { padding: 48px 16px; text-align: center; color: #6b7280; }
 .puck-view__empty a { color: #6366f1; }
 .puck-view__loading {
   display: flex; align-items: center; justify-content: center;

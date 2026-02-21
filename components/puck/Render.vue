@@ -1,5 +1,5 @@
 <template>
-  <div class="puck-render">
+  <div class="puck-render" role="article">
     <PuckRenderItem
       v-for="item in content"
       :key="item.props?.id"
@@ -24,6 +24,12 @@ const zones = computed(() => props.data?.zones || {})
 </script>
 
 <style scoped>
+.puck-render {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
 .puck-render__unknown {
   padding: 16px; color: #9ca3af; font-size: 13px;
   border: 1px dashed #d1d5db; border-radius: 4px; margin: 4px 0;

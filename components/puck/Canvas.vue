@@ -15,8 +15,8 @@
           :title="vp.label"
           @click="setViewport(vp)"
         >
-          <svg v-if="vp.width <= 480" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-          <svg v-else-if="vp.width <= 768" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+          <svg v-if="vp.label === 'Small' || (typeof vp.width === 'number' && vp.width <= 480)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+          <svg v-else-if="vp.label === 'Medium' || (typeof vp.width === 'number' && vp.width <= 768)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
           <svg v-else-if="vp.width === '100%'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
           <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           <span class="puck-vp-label">{{ vp.label }}</span>
@@ -42,7 +42,12 @@
         class="puck-canvas__frame"
         :style="frameStyle"
       >
-        <div class="puck-canvas__viewport" :style="viewportStyle">
+        <div
+          class="puck-canvas__viewport"
+          :style="viewportStyle"
+          :data-viewport="viewportBreakpoint"
+        >
+          <div class="puck-canvas__viewport-inner">
           <PuckCanvasItem
             v-for="item in items"
             :key="item.props?.id"
@@ -65,6 +70,7 @@
               <path d="M12 8v8M8 12h8"/>
             </svg>
             <p>Drag components here to start building</p>
+          </div>
           </div>
         </div>
       </div>
@@ -99,11 +105,12 @@ const emit = defineEmits<{
 const canvasRef = ref<HTMLElement | null>(null)
 const scrollAreaRef = ref<HTMLElement | null>(null)
 
+/* Viewports aligned with puck-main defaultViewports */
 const viewports = [
-  { width: 360, height: 'auto' as const, label: 'Mobile' },
-  { width: 768, height: 'auto' as const, label: 'Tablet' },
-  { width: 1280, height: 'auto' as const, label: 'Desktop' },
-  { width: '100%' as const, height: 'auto' as const, label: 'Full' },
+  { width: 360, height: 'auto' as const, label: 'Small' },
+  { width: 768, height: 'auto' as const, label: 'Medium' },
+  { width: 1280, height: 'auto' as const, label: 'Large' },
+  { width: '100%' as const, height: 'auto' as const, label: 'Full-width' },
 ]
 
 const currentViewport = ref(viewports[3])
@@ -111,7 +118,7 @@ const zoomLevel = ref(100)
 
 function setViewport(vp: typeof viewports[number]) {
   currentViewport.value = vp
-  autoFitZoom()
+  nextTick(() => autoFitZoom())
 }
 
 function zoomIn() {
@@ -136,11 +143,20 @@ function autoFitZoom() {
   zoomLevel.value = Math.round(ratio * 100)
 }
 
+const viewportBreakpoint = computed(() => {
+  const w = currentViewport.value.width
+  if (w === '100%') return 'full'
+  if (w <= 360) return 'mobile'
+  if (w <= 768) return 'tablet'
+  return 'desktop'
+})
+
 const viewportStyle = computed(() => {
   const w = currentViewport.value.width
   return {
     width: w === '100%' ? '100%' : `${w}px`,
     minHeight: '100%',
+    maxWidth: w === '100%' ? '100%' : `${w}px`,
   }
 })
 
@@ -155,14 +171,39 @@ const frameStyle = computed(() => {
 
 let ro: ResizeObserver | null = null
 
+/** Select closest viewport to window width on load (per puck-main) */
+function selectClosestViewport() {
+  if (typeof window === 'undefined') return
+  const viewportWidth = window.innerWidth
+  const frameWidth = scrollAreaRef.value?.clientWidth ?? 0
+  const fullWidth = viewports.find((v) => v.width === '100%')
+  const withWidth = viewports.filter((v) => v.width !== '100%') as { width: number; height: string; label: string }[]
+  if (!withWidth.length) return
+  const sorted = [...withWidth].sort(
+    (a, b) =>
+      Math.abs(viewportWidth - a.width) - Math.abs(viewportWidth - b.width)
+  )
+  const closest = sorted[0]
+  if (!closest) return
+  if (frameWidth > 0 && fullWidth && closest.width < frameWidth) {
+    currentViewport.value = fullWidth
+  } else {
+    currentViewport.value = closest as (typeof viewports)[number]
+  }
+}
+
 onMounted(() => {
+  selectClosestViewport()
+  nextTick(() => {
+    selectClosestViewport()
+    autoFitZoom()
+  })
   if (scrollAreaRef.value) {
     ro = new ResizeObserver(() => {
       if (currentViewport.value.width !== '100%') autoFitZoom()
     })
     ro.observe(scrollAreaRef.value)
   }
-  autoFitZoom()
 })
 
 onBeforeUnmount(() => {
@@ -181,8 +222,19 @@ function handleDrop(e: DragEvent) {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #e5e7eb;
+  background: var(--puck-color-bg-canvas, #e5e7eb);
   overflow: hidden;
+  padding: var(--puck-space-px, 16px);
+  position: relative;
+}
+@media (min-width: 1198px) {
+  .puck-canvas {
+    padding: calc(var(--puck-space-px, 16px) * 1.5);
+    padding-top: calc(var(--puck-space-px, 16px) * 0.5);
+  }
+  .puck-canvas:not(:has(.puck-canvas__toolbar)) {
+    padding-top: calc(var(--puck-space-px, 16px) * 1.5);
+  }
 }
 
 .puck-canvas__toolbar {
@@ -190,6 +242,7 @@ function handleDrop(e: DragEvent) {
   align-items: center;
   justify-content: space-between;
   padding: 6px 12px;
+  padding-bottom: calc(var(--puck-space-px, 16px) * 0.5);
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
   flex-shrink: 0;
@@ -260,22 +313,46 @@ function handleDrop(e: DragEvent) {
 .puck-canvas__scroll {
   flex: 1;
   overflow: auto;
-  padding: 24px;
+  padding: 0;
+  min-width: 0;
 }
 
 .puck-canvas__frame {
   display: flex;
   justify-content: center;
   min-height: 100%;
+  min-width: 288px;
+  position: relative;
+  width: 100%;
 }
 
 .puck-canvas__viewport {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
-  padding: 1px;
+  outline: 1px solid var(--puck-color-border);
+  padding: 0;
   min-height: 400px;
+  min-width: 321px;
   transition: width 0.3s ease;
+  overflow-x: hidden;
+  box-sizing: content-box;
+  flex-shrink: 0;
+}
+@media (min-width: 1198px) {
+  .puck-canvas__viewport {
+    min-width: unset;
+  }
+}
+
+.puck-canvas__viewport-inner {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 1px;
+  overflow-x: hidden;
 }
 
 .puck-canvas__empty {

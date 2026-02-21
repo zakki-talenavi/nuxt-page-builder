@@ -301,6 +301,8 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
   border: 2px solid transparent;
   cursor: pointer;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  min-width: 0;
+  max-width: 100%;
 }
 .puck-canvas-item:hover,
 .puck-canvas-item.is-hovered { border-color: #c7d2fe; }

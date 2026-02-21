@@ -40,3 +40,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Responsive containment: editor viewport & view page */
+.puck-canvas__viewport-inner > *,
+.puck-render > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Reduced motion: disable viewport/zoom transitions (per puck-main) */
+@media (prefers-reduced-motion: reduce) {
+  .puck-canvas__viewport,
+  .puck-canvas__frame {
+    transition: none !important;
+  }
+}

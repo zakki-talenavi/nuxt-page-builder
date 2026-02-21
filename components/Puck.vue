@@ -294,7 +294,9 @@ function handlePublish() {
 </script>
 
 <style scoped>
+/* Responsive layout per puck-main: overflow-x hidden on narrow, auto on wider */
 .puck-editor {
+  --puck-space-px: 16px;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -302,11 +304,18 @@ function handlePublish() {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
+  overflow-x: hidden;
+}
+@media (min-width: 766px) {
+  .puck-editor {
+    overflow-x: auto;
+  }
 }
 .puck-body {
   display: flex;
   flex: 1;
   min-height: 0;
+  min-width: 0;
 }
 
 .puck-help-content { font-size: 14px; line-height: 1.6; color: #374151; }
