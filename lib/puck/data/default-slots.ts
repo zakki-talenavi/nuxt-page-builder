@@ -1,4 +1,4 @@
-import type { Fields } from '~/types/puck'
+import type { Fields } from '@@/types/puck'
 
 export const defaultSlots = (value: object, fields: Fields) =>
   Object.keys(fields).reduce(

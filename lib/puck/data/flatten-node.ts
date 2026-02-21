@@ -1,8 +1,6 @@
-import flat from 'flat'
-import type { ComponentData, Config, RootData, UserGenerics } from '~/types/puck'
+import { flatten, unflatten } from 'flat'
+import type { ComponentData, Config, RootData, UserGenerics } from '@@/types/puck'
 import { stripSlots } from './strip-slots'
-
-const { flatten, unflatten } = flat as { flatten: (o: object) => object; unflatten: (o: object) => object }
 
 const isPureObject = (val: any) =>
   val != null && Object.prototype.toString.call(val) === '[object Object]'

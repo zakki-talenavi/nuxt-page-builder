@@ -12,4 +12,4 @@ export type {
   RegisterZoneAction,
   UnregisterZoneAction,
   PuckAction,
-} from '~/types/puck/reducer-actions'
+} from '@@/types/puck/reducer-actions'

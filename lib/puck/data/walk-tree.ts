@@ -4,7 +4,7 @@ import type {
   Content,
   RootData,
   UserGenerics,
-} from '~/types/puck'
+} from '@@/types/puck'
 import { mapFields } from './map-fields'
 
 type WalkTreeOptions = { parentId: string; propName: string }

@@ -5,7 +5,7 @@ import type {
   DefaultComponentProps,
   DefaultComponents,
   DefaultRootFieldProps,
-} from '~/types/puck'
+} from '@@/types/puck'
 import { defaultData } from './data/default-data'
 
 type PropTransform<

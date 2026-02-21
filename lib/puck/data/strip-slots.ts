@@ -1,4 +1,4 @@
-import type { ComponentData, Config, RootData } from '~/types/puck'
+import type { ComponentData, Config, RootData } from '@@/types/puck'
 import { mapFields } from './map-fields'
 
 export const stripSlots = (

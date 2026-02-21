@@ -1,4 +1,4 @@
-import type { PrivateAppState } from '~/types/puck'
+import type { PrivateAppState } from '@@/types/puck'
 
 export const getIdsForParent = (zoneCompound: string, state: PrivateAppState): string[] => {
   const [parentId] = zoneCompound.split(':')

@@ -10,11 +10,9 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@pinia/nuxt', '@primevue/nuxt-module'],
 
+  css: [resolve(__rootDir, 'assets/css/puck.css')],
+
   alias: {
-    '~/types': resolve(__rootDir, 'types'),
-    '~/lib': resolve(__rootDir, 'lib'),
-    '~/stores': resolve(__rootDir, 'stores'),
-    '~/composables': resolve(__rootDir, 'composables'),
     '~/config': resolve(__rootDir, 'app/config'),
   },
 

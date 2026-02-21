@@ -1,0 +1,42 @@
+@import './puck-colors.css';
+@import './puck-typography.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.puck-reset {
+  font-family: var(--puck-font-family);
+  font-size: var(--puck-font-size-md);
+  line-height: var(--puck-line-height);
+  color: var(--puck-color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.puck-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.puck-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.puck-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--puck-color-border);
+  border-radius: 3px;
+}
+.puck-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--puck-color-text-muted);
+}
+
+.puck-focus-ring:focus-visible {
+  outline: 2px solid var(--puck-color-primary);
+  outline-offset: 2px;
+}
+
+.puck-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

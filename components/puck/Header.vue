@@ -1,16 +1,36 @@
 <template>
-  <div class="puck-header">
-    <slot name="actions" />
-    <PuckButton
-      label="Publish"
-      severity="primary"
-      @click="$emit('publish')"
-    />
-  </div>
+  <header class="puck-header">
+    <div class="puck-header__left">
+      <svg class="puck-logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M9 3v18M3 9h6" />
+      </svg>
+      <span class="puck-header__title">{{ title || 'Puck Editor' }}</span>
+    </div>
+    <div class="puck-header__right">
+      <button class="puck-btn puck-btn--ghost" @click="$emit('undo')" :disabled="!canUndo" title="Undo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.6-6.4L3 9"/></svg>
+      </button>
+      <button class="puck-btn puck-btn--ghost" @click="$emit('redo')" :disabled="!canRedo" title="Redo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-2.6-6.4L21 9"/></svg>
+      </button>
+      <div class="puck-header__divider" />
+      <button class="puck-btn puck-btn--primary" @click="$emit('publish')">Publish</button>
+    </div>
+  </header>
 </template>
 
 <script setup lang="ts">
-defineEmits<{ (e: 'publish'): void }>()
+defineProps<{
+  title?: string
+  canUndo?: boolean
+  canRedo?: boolean
+}>()
+defineEmits<{
+  (e: 'undo'): void
+  (e: 'redo'): void
+  (e: 'publish'): void
+}>()
 </script>
 
 <style scoped>
@@ -18,6 +38,26 @@ defineEmits<{ (e: 'publish'): void }>()
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
+  padding: 0 16px;
+  height: 48px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+  flex-shrink: 0;
 }
+.puck-header__left { display: flex; align-items: center; gap: 10px; }
+.puck-logo { color: #6366f1; }
+.puck-header__title { font-weight: 600; font-size: 14px; color: #1f2937; }
+.puck-header__right { display: flex; align-items: center; gap: 4px; }
+.puck-header__divider { width: 1px; height: 20px; background: #e5e7eb; margin: 0 8px; }
+.puck-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; font-size: 13px; font-weight: 500;
+  border-radius: 6px; border: none; cursor: pointer;
+  transition: all 0.15s ease; color: #1f2937;
+}
+.puck-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.puck-btn--primary { background: #6366f1; color: #fff; }
+.puck-btn--primary:hover:not(:disabled) { background: #4f46e5; }
+.puck-btn--ghost { background: transparent; color: #6b7280; padding: 6px; }
+.puck-btn--ghost:hover:not(:disabled) { background: #f3f4f6; color: #1f2937; }
 </style>

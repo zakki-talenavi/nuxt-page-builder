@@ -5,7 +5,7 @@ import type {
   Field,
   Fields,
   RootData,
-} from '~/types/puck'
+} from '@@/types/puck'
 import { defaultSlots } from './default-slots'
 
 export type MapFnParams<ThisField = Field> = {

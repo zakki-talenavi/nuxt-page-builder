@@ -1,5 +1,5 @@
 import { useMagicKeys } from '@vueuse/core'
-import { usePuckStore } from '~/stores/puck'
+import { usePuckStore } from '@@/stores/puck'
 
 export function usePuckHotkeys() {
   const store = usePuckStore()

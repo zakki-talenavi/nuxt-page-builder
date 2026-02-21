@@ -1,4 +1,4 @@
-import type { ComponentData } from '~/types/puck'
+import type { ComponentData } from '@@/types/puck'
 import { deepEqual } from 'fast-equals'
 
 export const getChanged = (

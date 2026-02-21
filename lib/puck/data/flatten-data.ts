@@ -1,5 +1,5 @@
-import type { ComponentData, Config, UserGenerics } from '~/types/puck'
-import type { PrivateAppState } from '~/types/puck'
+import type { ComponentData, Config, UserGenerics } from '@@/types/puck'
+import type { PrivateAppState } from '@@/types/puck'
 import { walkAppState } from './walk-app-state'
 
 export const flattenData = <

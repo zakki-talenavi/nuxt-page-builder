@@ -15,19 +15,19 @@ import type {
   History,
   Permissions,
   PrivateAppState,
-} from '~/types/puck'
-import type { PuckAction } from '~/lib/puck/reducer/actions'
-import { createReducer } from '~/lib/puck/reducer'
-import { getItem } from '~/lib/puck/data/get-item'
-import { defaultViewports } from '~/lib/puck/default-viewports'
-import { defaultAppState } from '~/lib/puck/default-app-state'
-import { resolveComponentData } from '~/lib/puck/resolve-component-data'
-import { walkAppState } from '~/lib/puck/data/walk-app-state'
-import { toRoot } from '~/lib/puck/data/to-root'
-import { generateId } from '~/lib/puck/generate-id'
-import { getChanged } from '~/lib/puck/get-changed'
-import { makeStatePublic } from '~/lib/puck/data/make-state-public'
-import { flattenData } from '~/lib/puck/data/flatten-data'
+} from '@@/types/puck'
+import type { PuckAction } from '@@/lib/puck/reducer/actions'
+import { createReducer } from '@@/lib/puck/reducer'
+import { getItem } from '@@/lib/puck/data/get-item'
+import { defaultViewports } from '@@/lib/puck/default-viewports'
+import { defaultAppState } from '@@/lib/puck/default-app-state'
+import { resolveComponentData } from '@@/lib/puck/resolve-component-data'
+import { walkAppState } from '@@/lib/puck/data/walk-app-state'
+import { toRoot } from '@@/lib/puck/data/to-root'
+import { generateId } from '@@/lib/puck/generate-id'
+import { getChanged } from '@@/lib/puck/get-changed'
+import { makeStatePublic } from '@@/lib/puck/data/make-state-public'
+import { flattenData } from '@@/lib/puck/data/flatten-data'
 
 export type Status = 'LOADING' | 'MOUNTED' | 'READY'
 
@@ -137,6 +137,7 @@ export const usePuckStore = defineStore('puck', {
   actions: {
     init(initial: {
       config: Config
+      data?: any
       state?: AppState
       plugins?: Plugin[]
       overrides?: Partial<Overrides>
@@ -145,18 +146,38 @@ export const usePuckStore = defineStore('puck', {
       onAction?: (action: PuckAction, newState: AppState, prevState: AppState) => void
     }) {
       this.config = initial.config
-      if (initial.state) this.state = initial.state as PrivateAppState
       if (initial.plugins) this.plugins = initial.plugins
       if (initial.overrides) this.overrides = initial.overrides
       if (initial.iframe) this.iframe = initial.iframe
       if (initial.metadata) this.metadata = initial.metadata ?? {}
       if (initial.onAction) this.onAction = initial.onAction
-      this.initialAppState = this.state as PrivateAppState
+
+      let baseState: PrivateAppState = { ...defaultAppState } as PrivateAppState
+      if (initial.state) {
+        baseState = {
+          ...baseState,
+          ...initial.state,
+          indexes: (initial.state as any).indexes || { nodes: {}, zones: {} },
+        } as PrivateAppState
+      }
+      if (initial.data) {
+        baseState = {
+          ...baseState,
+          data: initial.data,
+        } as PrivateAppState
+      }
+      if (!baseState.indexes) {
+        baseState.indexes = { nodes: {}, zones: {} }
+      }
+
+      this.state = walkAppState(baseState as any, this.config) as PrivateAppState
+      this.initialAppState = this.state
       this.histories = [{ state: makeStatePublic(this.state as any), id: generateId('history') }]
       this.historyIndex = 0
       this.selectedItem = this.state.ui.itemSelector
         ? getItem(this.state.ui.itemSelector, this.state as any)
         : null
+      this.status = 'READY'
     },
 
     dispatch(action: PuckAction) {

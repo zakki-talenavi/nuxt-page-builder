@@ -1,16 +1,14 @@
 <template>
   <div class="puck-render">
-    <div
-      v-for="(item, i) in content"
-      :key="item.props?.id || i"
-      class="puck-render-item"
-    >
+    <div v-for="item in content" :key="item.props?.id">
       <component
-        v-if="getComponent(item.type)"
-        :is="getComponent(item.type)"
+        v-if="getRenderer(item.type)"
+        :is="getRenderer(item.type)"
         v-bind="item.props || {}"
       />
-      <div v-else class="puck-render-unknown">{{ item.type }}</div>
+      <div v-else class="puck-render__unknown">
+        Unknown component: {{ item.type }}
+      </div>
     </div>
   </div>
 </template>
@@ -19,25 +17,19 @@
 const props = defineProps<{
   config: any
   data: any
-  metadata?: Record<string, any>
 }>()
 
 const content = computed(() => props.data?.content || [])
 
-function getComponent(type: string) {
-  return props.config?.components?.[type]?.render ?? null
+function getRenderer(type: string) {
+  return props.config?.components?.[type]?.render || null
 }
 </script>
 
 <style scoped>
-.puck-render-item {
-  margin-bottom: 0;
-}
-.puck-render-unknown {
-  padding: 16px;
-  color: #9ca3af;
+.puck-render__unknown {
+  padding: 16px; color: #9ca3af; font-size: 13px;
+  border: 1px dashed #d1d5db; border-radius: 4px; margin: 4px 0;
   text-align: center;
-  border: 1px dashed #d1d5db;
-  border-radius: 4px;
 }
 </style>

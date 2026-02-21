@@ -6,8 +6,8 @@ import type {
   Content,
   Data,
   RootDataWithProps,
-} from '~/types/puck'
-import type { NodeIndex, PrivateAppState, ZoneIndex, ZoneType } from '~/types/puck'
+} from '@@/types/puck'
+import type { NodeIndex, PrivateAppState, ZoneIndex, ZoneType } from '@@/types/puck'
 import { mapFields } from './map-fields'
 import { flattenNode } from './flatten-node'
 

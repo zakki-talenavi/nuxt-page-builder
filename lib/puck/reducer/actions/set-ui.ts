@@ -1,6 +1,6 @@
-import type { Data } from '~/types/puck'
+import type { Data } from '@@/types/puck'
 import type { SetUiAction } from '../actions'
-import type { PrivateAppState } from '~/types/puck'
+import type { PrivateAppState } from '@@/types/puck'
 
 export const setUiAction = <UserData extends Data>(
   state: PrivateAppState<UserData>,

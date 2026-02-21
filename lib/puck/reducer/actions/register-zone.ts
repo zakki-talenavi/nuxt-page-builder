@@ -1,6 +1,6 @@
-import type { Content, Data } from '~/types/puck'
+import type { Content, Data } from '@@/types/puck'
 import type { RegisterZoneAction, UnregisterZoneAction } from '../actions'
-import type { PrivateAppState } from '~/types/puck'
+import type { PrivateAppState } from '@@/types/puck'
 import { setupZone } from '../../data/setup-zone'
 
 export const zoneCache: Record<string, Content> = {}

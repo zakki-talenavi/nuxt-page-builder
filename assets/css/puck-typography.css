@@ -1,0 +1,36 @@
+:root {
+  --puck-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --puck-font-size-xs: 11px;
+  --puck-font-size-sm: 12px;
+  --puck-font-size-base: 13px;
+  --puck-font-size-md: 14px;
+  --puck-font-size-lg: 16px;
+  --puck-font-size-xl: 20px;
+
+  --puck-line-height: 1.5;
+  --puck-line-height-tight: 1.25;
+
+  --puck-font-weight-normal: 400;
+  --puck-font-weight-medium: 500;
+  --puck-font-weight-semibold: 600;
+  --puck-font-weight-bold: 700;
+
+  --puck-letter-spacing-wide: 0.05em;
+  --puck-letter-spacing-normal: 0.03em;
+
+  --puck-border-radius-sm: 4px;
+  --puck-border-radius-md: 6px;
+  --puck-border-radius-lg: 8px;
+  --puck-border-radius-xl: 12px;
+
+  --puck-spacing-xs: 4px;
+  --puck-spacing-sm: 8px;
+  --puck-spacing-md: 12px;
+  --puck-spacing-lg: 16px;
+  --puck-spacing-xl: 24px;
+
+  --puck-header-height: 48px;
+  --puck-sidebar-width: 256px;
+  --puck-sidebar-min-width: 180px;
+  --puck-sidebar-max-width: 420px;
+}
