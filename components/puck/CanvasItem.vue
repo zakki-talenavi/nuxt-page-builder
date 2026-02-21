@@ -186,12 +186,14 @@ const containerStyle = computed(() => {
   const p = props.item.props || {}
   const type = props.item.type
   if (type === 'Grid') {
+    const cols = p.numColumns || 4
     return {
       display: 'grid',
-      gridTemplateColumns: `repeat(${p.numColumns || 4}, 1fr)`,
+      gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
       gap: `${p.gap || 24}px`,
       padding: '8px',
       minHeight: '60px',
+      overflowX: 'auto' as const,
     }
   }
   if (type === 'Columns') {
@@ -199,10 +201,11 @@ const containerStyle = computed(() => {
     const gap = parseInt(String(p.gap)) || 16
     return {
       display: 'grid',
-      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
       gap: `${gap}px`,
       padding: '8px',
       minHeight: '60px',
+      overflowX: 'auto' as const,
     }
   }
   if (type === 'Flex') {
@@ -331,11 +334,13 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
 
 .puck-canvas-column {
   min-height: 60px;
+  min-width: 0;
   border: 2px dashed #e5e7eb;
   border-radius: 8px;
   padding: 8px;
   transition: all 0.15s;
   background: #fafbfc;
+  overflow: hidden;
 }
 .puck-canvas-column.is-drag-over {
   background: rgba(99, 102, 241, 0.05);
@@ -343,7 +348,8 @@ function onZoneDrop(e: DragEvent, zoneKey: string) {
 }
 .puck-canvas-column__empty {
   display: flex; align-items: center; justify-content: center;
-  min-height: 50px; color: #9ca3af; font-size: 13px;
+  min-height: 50px; color: #9ca3af; font-size: 11px;
+  text-align: center; word-break: break-word; overflow: hidden;
 }
 
 .puck-canvas-flex-zone {

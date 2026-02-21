@@ -1,33 +1,72 @@
 <template>
   <main
+    ref="canvasRef"
     class="puck-canvas"
-    @dragover.prevent
-    @drop.prevent="handleDrop"
     @click.self="$emit('deselect')"
   >
-    <div class="puck-canvas__viewport">
-      <PuckCanvasItem
-        v-for="item in items"
-        :key="item.props?.id"
-        :item="item"
-        :config="config"
-        :selected-id="selectedId"
-        :hovered-id="hoveredId"
-        :zone="rootZone"
-        @select="$emit('select', $event)"
-        @hover="$emit('hover', $event)"
-        @deselect="$emit('deselect')"
-        @duplicate="$emit('duplicate', $event)"
-        @remove="$emit('remove', $event)"
-        @slot-drop="$emit('slot-drop', $event)"
-      />
+    <!-- Viewport controls + zoom -->
+    <div class="puck-canvas__toolbar">
+      <div class="puck-canvas__viewports">
+        <button
+          v-for="vp in viewports"
+          :key="vp.label"
+          class="puck-vp-btn"
+          :class="{ active: currentViewport.label === vp.label }"
+          :title="vp.label"
+          @click="setViewport(vp)"
+        >
+          <svg v-if="vp.width <= 480" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+          <svg v-else-if="vp.width <= 768" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+          <svg v-else-if="vp.width === '100%'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span class="puck-vp-label">{{ vp.label }}</span>
+        </button>
+      </div>
+      <div class="puck-canvas__zoom">
+        <button class="puck-zoom-btn" @click="zoomOut" :disabled="zoomLevel <= 25" title="Zoom out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <span class="puck-zoom-value">{{ zoomLevel }}%</span>
+        <button class="puck-zoom-btn" @click="zoomIn" :disabled="zoomLevel >= 200" title="Zoom in">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="puck-zoom-btn" @click="resetZoom" title="Reset zoom">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+    </div>
 
-      <div v-if="!items.length" class="puck-canvas__empty">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path d="M12 8v8M8 12h8"/>
-        </svg>
-        <p>Drag components here to start building</p>
+    <!-- Scrollable canvas area -->
+    <div ref="scrollAreaRef" class="puck-canvas__scroll" @dragover.prevent @drop.prevent="handleDrop">
+      <div
+        class="puck-canvas__frame"
+        :style="frameStyle"
+      >
+        <div class="puck-canvas__viewport" :style="viewportStyle">
+          <PuckCanvasItem
+            v-for="item in items"
+            :key="item.props?.id"
+            :item="item"
+            :config="config"
+            :selected-id="selectedId"
+            :hovered-id="hoveredId"
+            :zone="rootZone"
+            @select="$emit('select', $event)"
+            @hover="$emit('hover', $event)"
+            @deselect="$emit('deselect')"
+            @duplicate="$emit('duplicate', $event)"
+            @remove="$emit('remove', $event)"
+            @slot-drop="$emit('slot-drop', $event)"
+          />
+
+          <div v-if="!items.length" class="puck-canvas__empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
+            <p>Drag components here to start building</p>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -57,6 +96,79 @@ const emit = defineEmits<{
   (e: 'slot-drop', payload: { componentType?: string; moveId?: string; zone: string; index: number }): void
 }>()
 
+const canvasRef = ref<HTMLElement | null>(null)
+const scrollAreaRef = ref<HTMLElement | null>(null)
+
+const viewports = [
+  { width: 360, height: 'auto' as const, label: 'Mobile' },
+  { width: 768, height: 'auto' as const, label: 'Tablet' },
+  { width: 1280, height: 'auto' as const, label: 'Desktop' },
+  { width: '100%' as const, height: 'auto' as const, label: 'Full' },
+]
+
+const currentViewport = ref(viewports[3])
+const zoomLevel = ref(100)
+
+function setViewport(vp: typeof viewports[number]) {
+  currentViewport.value = vp
+  autoFitZoom()
+}
+
+function zoomIn() {
+  zoomLevel.value = Math.min(zoomLevel.value + 10, 200)
+}
+
+function zoomOut() {
+  zoomLevel.value = Math.max(zoomLevel.value - 10, 25)
+}
+
+function resetZoom() {
+  autoFitZoom()
+}
+
+function autoFitZoom() {
+  const el = scrollAreaRef.value
+  if (!el) { zoomLevel.value = 100; return }
+  const w = currentViewport.value.width
+  if (w === '100%') { zoomLevel.value = 100; return }
+  const available = el.clientWidth - 48
+  const ratio = Math.min(available / (w as number), 1)
+  zoomLevel.value = Math.round(ratio * 100)
+}
+
+const viewportStyle = computed(() => {
+  const w = currentViewport.value.width
+  return {
+    width: w === '100%' ? '100%' : `${w}px`,
+    minHeight: '100%',
+  }
+})
+
+const frameStyle = computed(() => {
+  const scale = zoomLevel.value / 100
+  return {
+    transform: `scale(${scale})`,
+    transformOrigin: 'top center',
+    width: scale < 1 ? `${100 / scale}%` : '100%',
+  }
+})
+
+let ro: ResizeObserver | null = null
+
+onMounted(() => {
+  if (scrollAreaRef.value) {
+    ro = new ResizeObserver(() => {
+      if (currentViewport.value.width !== '100%') autoFitZoom()
+    })
+    ro.observe(scrollAreaRef.value)
+  }
+  autoFitZoom()
+})
+
+onBeforeUnmount(() => {
+  ro?.disconnect()
+})
+
 function handleDrop(e: DragEvent) {
   if (store.getPermissions()?.insert === false) return
   const type = e.dataTransfer?.getData('application/puck-component') || e.dataTransfer?.getData('text/plain')
@@ -65,12 +177,117 @@ function handleDrop(e: DragEvent) {
 </script>
 
 <style scoped>
-.puck-canvas { flex: 1; background: #f3f4f6; overflow-y: auto; padding: 24px; }
-.puck-canvas__viewport { max-width: 960px; margin: 0 auto; min-height: 100%; }
+.puck-canvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.puck-canvas__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.puck-canvas__viewports {
+  display: flex;
+  gap: 2px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.puck-vp-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.puck-vp-btn:hover { color: #6b7280; background: #fff; }
+.puck-vp-btn.active { color: #6366f1; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.puck-vp-label { display: none; }
+@media (min-width: 900px) {
+  .puck-vp-label { display: inline; }
+}
+
+.puck-canvas__zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 3px;
+}
+.puck-zoom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.puck-zoom-btn:hover:not(:disabled) { background: #fff; color: #374151; }
+.puck-zoom-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.puck-zoom-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  min-width: 40px;
+  text-align: center;
+  user-select: none;
+}
+
+.puck-canvas__scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+.puck-canvas__frame {
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.puck-canvas__viewport {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  padding: 1px;
+  min-height: 400px;
+  transition: width 0.3s ease;
+}
+
 .puck-canvas__empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 64px 24px; border: 2px dashed #d1d5db; border-radius: 12px;
-  background: #fff; text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  margin: 16px;
+  text-align: center;
 }
 .puck-canvas__empty p { margin: 12px 0 0; color: #9ca3af; font-size: 14px; }
 </style>
