@@ -1,15 +1,12 @@
 <template>
   <div class="puck-render">
-    <div v-for="item in content" :key="item.props?.id">
-      <component
-        v-if="getRenderer(item.type)"
-        :is="getRenderer(item.type)"
-        v-bind="item.props || {}"
-      />
-      <div v-else class="puck-render__unknown">
-        Unknown component: {{ item.type }}
-      </div>
-    </div>
+    <PuckRenderItem
+      v-for="item in content"
+      :key="item.props?.id"
+      :item="item"
+      :config="config"
+      :zones="zones"
+    />
   </div>
 </template>
 
@@ -19,11 +16,11 @@ const props = defineProps<{
   data: any
 }>()
 
-const content = computed(() => props.data?.content || [])
+provide('puckRenderConfig', computed(() => props.config))
+provide('puckRenderZones', computed(() => props.data?.zones || {}))
 
-function getRenderer(type: string) {
-  return props.config?.components?.[type]?.render || null
-}
+const content = computed(() => props.data?.content || [])
+const zones = computed(() => props.data?.zones || {})
 </script>
 
 <style scoped>

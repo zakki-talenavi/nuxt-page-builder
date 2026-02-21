@@ -20,6 +20,8 @@ const route = useRoute()
 const path = computed(() => (route.params.path as string[] | undefined)?.join('/') || '')
 const storageKey = computed(() => `puck-data-${path.value || 'index'}`)
 
+provide('puckConfig', computed(() => puckConfig))
+
 const resolvedData = ref<any>(null)
 
 onMounted(() => {

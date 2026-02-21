@@ -7,6 +7,7 @@
       @undo="store.historyBack()"
       @redo="store.historyForward()"
       @publish="handlePublish"
+      @toggle-json="showJsonPanel = !showJsonPanel"
     />
 
     <PuckDragDropContext>
@@ -22,6 +23,7 @@
         />
 
         <PuckCanvas
+          v-if="!showJsonPanel"
           :items="items"
           :config="store.config"
           :selected-id="selectedId"
@@ -35,8 +37,31 @@
           @slot-drop="onSlotDrop"
         />
 
+        <!-- JSON Schema Viewer -->
+        <div v-if="showJsonPanel" class="puck-json-panel">
+          <div class="puck-json-panel__header">
+            <span class="puck-json-panel__title">JSON Schema — puck-data-index</span>
+            <div class="puck-json-panel__actions">
+              <button class="puck-json-panel__btn" @click="copyJson" :title="copyLabel">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                {{ copyLabel }}
+              </button>
+              <button class="puck-json-panel__btn" @click="showJsonPanel = false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                Close
+              </button>
+            </div>
+          </div>
+          <div class="puck-json-panel__stats">
+            <span>Root fields: {{ Object.keys(jsonData.root?.props || jsonData.root || {}).length }}</span>
+            <span>Content items: {{ jsonData.content?.length || 0 }}</span>
+            <span>Zones: {{ Object.keys(jsonData.zones || {}).length }}</span>
+          </div>
+          <pre class="puck-json-panel__code"><code>{{ formattedJson }}</code></pre>
+        </div>
+
         <PuckFieldsSidebar
-          v-if="selectedItem || showPageFields"
+          v-if="(selectedItem || showPageFields) && !showJsonPanel"
           :selected-item="selectedItem"
           :config="store.config"
           :root-props="rootProps"
@@ -72,6 +97,8 @@ const activeLeftTab = ref('components')
 const rightPanel = ref<'component' | 'page'>('page')
 const showPageFields = ref(true)
 const hoveredId = ref<string | null>(null)
+const showJsonPanel = ref(false)
+const copyLabel = ref('Copy')
 
 onMounted(() => {
   store.init({ config: props.config, data: props.data, metadata: props.metadata })
@@ -94,6 +121,21 @@ const componentList = computed(() =>
     label: cfg?.label || key,
   }))
 )
+
+const jsonData = computed(() => ({
+  root: store.state?.data?.root,
+  content: store.state?.data?.content || [],
+  zones: store.state?.data?.zones || {},
+}))
+
+const formattedJson = computed(() => JSON.stringify(jsonData.value, null, 2))
+
+function copyJson() {
+  navigator.clipboard.writeText(formattedJson.value).then(() => {
+    copyLabel.value = 'Copied!'
+    setTimeout(() => { copyLabel.value = 'Copy' }, 2000)
+  })
+}
 
 function findNodeLocation(id: string): { zone: string; index: number } | null {
   const nodeInfo = (store.state as any).indexes?.nodes?.[id]
@@ -245,5 +287,72 @@ function handlePublish() {
   display: flex;
   flex: 1;
   min-height: 0;
+}
+
+.puck-json-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  overflow: hidden;
+}
+.puck-json-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #181825;
+  border-bottom: 1px solid #313244;
+  flex-shrink: 0;
+}
+.puck-json-panel__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cba6f7;
+}
+.puck-json-panel__actions {
+  display: flex;
+  gap: 6px;
+}
+.puck-json-panel__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #45475a;
+  border-radius: 4px;
+  background: transparent;
+  color: #bac2de;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.puck-json-panel__btn:hover {
+  background: #313244;
+  border-color: #cba6f7;
+  color: #cba6f7;
+}
+.puck-json-panel__stats {
+  display: flex;
+  gap: 16px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #6c7086;
+  border-bottom: 1px solid #313244;
+  flex-shrink: 0;
+}
+.puck-json-panel__code {
+  flex: 1;
+  overflow: auto;
+  margin: 0;
+  padding: 16px;
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+  color: #cdd6f4;
 }
 </style>
