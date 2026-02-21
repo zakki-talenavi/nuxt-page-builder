@@ -32,6 +32,7 @@
           @drop="onDrop"
           @duplicate="duplicateById"
           @remove="removeById"
+          @slot-drop="onSlotDrop"
         />
 
         <PuckFieldsSidebar
@@ -65,6 +66,8 @@ const emit = defineEmits<{ (e: 'publish', data: any): void }>()
 
 const store = usePuckStore()
 
+provide('puckConfig', computed(() => store.config))
+
 const activeLeftTab = ref('components')
 const rightPanel = ref<'component' | 'page'>('page')
 const showPageFields = ref(true)
@@ -92,14 +95,29 @@ const componentList = computed(() =>
   }))
 )
 
+function findNodeLocation(id: string): { zone: string; index: number } | null {
+  const nodeInfo = (store.state as any).indexes?.nodes?.[id]
+  if (!nodeInfo) return null
+
+  const parentId = nodeInfo.parentId
+  const zoneName = nodeInfo.zone
+  const zoneCompound = parentId && zoneName ? `${parentId}:${zoneName}` : rootDroppableId
+  const zoneIndex = (store.state as any).indexes?.zones?.[zoneCompound]
+
+  if (!zoneIndex) return null
+  const index = zoneIndex.contentIds.indexOf(id)
+  if (index < 0) return null
+  return { zone: zoneCompound, index }
+}
+
 function selectById(id: string | null) {
   if (!id) {
     deselectAll()
     return
   }
-  const index = items.value.findIndex((item: any) => item.props?.id === id)
-  if (index >= 0) {
-    store.setUi({ itemSelector: { index, zone: rootDroppableId } })
+  const loc = findNodeLocation(id)
+  if (loc) {
+    store.setUi({ itemSelector: { index: loc.index, zone: loc.zone } })
     rightPanel.value = 'component'
   }
 }
@@ -121,28 +139,59 @@ function onDrop(componentType: string) {
     destinationZone: rootDroppableId,
     destinationIndex: items.value.length,
   })
-  const newIndex = items.value.length - 1
-  store.setUi({ itemSelector: { index: newIndex, zone: rootDroppableId } })
-  rightPanel.value = 'component'
+  nextTick(() => {
+    const newContent = store.state?.data?.content || []
+    const lastItem = newContent[newContent.length - 1]
+    if (lastItem) {
+      store.setUi({ itemSelector: { index: newContent.length - 1, zone: rootDroppableId } })
+      rightPanel.value = 'component'
+    }
+  })
+}
+
+function onSlotDrop(payload: { componentType?: string; moveId?: string; zone: string; index: number }) {
+  if (payload.componentType) {
+    if (!store.config?.components?.[payload.componentType]) return
+    store.dispatch({
+      type: 'insert',
+      componentType: payload.componentType,
+      destinationZone: payload.zone,
+      destinationIndex: payload.index,
+    })
+    nextTick(() => {
+      store.setUi({ itemSelector: { index: payload.index, zone: payload.zone } })
+      rightPanel.value = 'component'
+    })
+  } else if (payload.moveId) {
+    const loc = findNodeLocation(payload.moveId)
+    if (!loc) return
+    store.dispatch({
+      type: 'move',
+      sourceZone: loc.zone,
+      sourceIndex: loc.index,
+      destinationZone: payload.zone,
+      destinationIndex: payload.index,
+    })
+  }
 }
 
 function duplicateById(id: string) {
-  const index = items.value.findIndex((item: any) => item.props?.id === id)
-  if (index < 0) return
+  const loc = findNodeLocation(id)
+  if (!loc) return
   store.dispatch({
     type: 'duplicate',
-    sourceIndex: index,
-    sourceZone: rootDroppableId,
+    sourceIndex: loc.index,
+    sourceZone: loc.zone,
   })
 }
 
 function removeById(id: string) {
-  const index = items.value.findIndex((item: any) => item.props?.id === id)
-  if (index < 0) return
+  const loc = findNodeLocation(id)
+  if (!loc) return
   store.dispatch({
     type: 'remove',
-    index,
-    zone: rootDroppableId,
+    index: loc.index,
+    zone: loc.zone,
   })
 }
 

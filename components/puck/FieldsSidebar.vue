@@ -89,7 +89,9 @@ const componentLabel = computed(() => {
 const componentFields = computed(() => {
   if (!props.selectedItem) return []
   const fields = props.config?.components?.[props.selectedItem.type]?.fields || {}
-  return Object.entries(fields).map(([key, config]: [string, any]) => ({ key, config }))
+  return Object.entries(fields)
+    .filter(([_, config]: [string, any]) => config.type !== 'slot')
+    .map(([key, config]: [string, any]) => ({ key, config }))
 })
 
 const pageFields = computed(() => {

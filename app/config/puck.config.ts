@@ -225,7 +225,7 @@ const GridBlock = defineComponent({
     numColumns: { type: Number, default: 4 },
     gap: { type: Number, default: 24 },
   },
-  setup(props) {
+  setup(props, { slots }) {
     return () =>
       h('div', {
         style: {
@@ -233,17 +233,9 @@ const GridBlock = defineComponent({
           gridTemplateColumns: `repeat(${props.numColumns}, 1fr)`,
           gap: `${props.gap}px`,
           padding: '8px 0',
+          minHeight: '60px',
         },
-      }, Array.from({ length: props.numColumns }, (_, i) =>
-        h('div', {
-          key: i,
-          style: {
-            minHeight: '80px', background: '#f9fafb', border: '2px dashed #e5e7eb',
-            borderRadius: '8px', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', color: '#9ca3af', fontSize: '13px',
-          },
-        }, `Column ${i + 1}`)
-      ))
+      }, slots.default?.() || [])
   },
 })
 
@@ -255,25 +247,16 @@ const ColumnsBlock = defineComponent({
     columns: { type: String, default: '2' },
     gap: { type: [String, Number], default: '16' },
   },
-  setup(props) {
+  setup(props, { slots }) {
     return () => {
       const cols = parseInt(String(props.columns)) || 2
       const g = parseInt(String(props.gap)) || 16
       return h('div', {
         style: {
           display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gap: `${g}px`, padding: '8px 0',
+          gap: `${g}px`, padding: '8px 0', minHeight: '60px',
         },
-      }, Array.from({ length: cols }, (_, i) =>
-        h('div', {
-          key: i,
-          style: {
-            minHeight: '80px', background: '#f9fafb', border: '2px dashed #e5e7eb',
-            borderRadius: '8px', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', color: '#9ca3af', fontSize: '13px',
-          },
-        }, `Column ${i + 1}`)
-      ))
+      }, slots.default?.() || [])
     }
   },
 })
@@ -288,7 +271,7 @@ const FlexBlock = defineComponent({
     gap: { type: Number, default: 24 },
     wrap: { type: String, default: 'wrap' },
   },
-  setup(props) {
+  setup(props, { slots }) {
     return () =>
       h('div', {
         style: {
@@ -299,12 +282,8 @@ const FlexBlock = defineComponent({
           flexWrap: props.wrap,
           padding: '8px 0',
           minHeight: '60px',
-          border: '2px dashed #e5e7eb',
-          borderRadius: '8px',
         },
-      }, [
-        h('div', { style: { color: '#9ca3af', fontSize: '13px', padding: '16px', textAlign: 'center', width: '100%' } }, 'Flex container — drop items here'),
-      ])
+      }, slots.default?.() || [])
   },
 })
 
