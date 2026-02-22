@@ -6,8 +6,10 @@
         <path d="M9 3v18M3 9h6" />
       </svg>
       <span class="puck-header__title">{{ title || 'Puck Editor' }}</span>
+      <code v-if="headerPath" class="puck-header__path">{{ headerPath }}</code>
     </div>
     <div class="puck-header__right">
+      <slot name="headerActions" :path="headerPath" />
       <button class="puck-btn puck-btn--ghost" @click="$emit('undo')" :disabled="!canUndo" title="Undo">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 2.6-6.4L3 9"/></svg>
       </button>
@@ -31,6 +33,7 @@
 <script setup lang="ts">
 defineProps<{
   title?: string
+  headerPath?: string
   canUndo?: boolean
   canRedo?: boolean
 }>()
@@ -57,6 +60,7 @@ defineEmits<{
 .puck-header__left { display: flex; align-items: center; gap: 10px; }
 .puck-logo { color: #6366f1; }
 .puck-header__title { font-weight: 600; font-size: 14px; color: #1f2937; }
+.puck-header__path { margin-left: 8px; font-size: 12px; color: #6b7280; background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
 .puck-header__right { display: flex; align-items: center; gap: 4px; }
 .puck-header__divider { width: 1px; height: 20px; background: #e5e7eb; margin: 0 8px; }
 .puck-btn {

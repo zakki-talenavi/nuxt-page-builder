@@ -15,23 +15,20 @@
 
 <script setup lang="ts">
 import { puckConfig } from '~/config/puck.config'
+import { useDemoData } from '~~/composables/useDemoData'
 
-const route = useRoute()
-const path = computed(() => (route.params.path as string[] | undefined)?.join('/') || '')
-const storageKey = computed(() => `puck-data-${path.value || 'index'}`)
+const demo = useDemoData({
+  path: '/',
+  isEdit: false,
+})
+
+const resolvedData = computed(() => demo.resolvedData.value)
+
+useHead({
+  title: () => (demo.data.value?.root as any)?.props?.title || (demo.data.value?.root as any)?.title || '',
+})
 
 provide('puckConfig', computed(() => puckConfig))
-
-const resolvedData = ref<any>(null)
-
-onMounted(() => {
-  try {
-    const raw = localStorage.getItem(storageKey.value)
-    resolvedData.value = raw ? JSON.parse(raw) : { root: { props: {} }, content: [] }
-  } catch {
-    resolvedData.value = { root: { props: {} }, content: [] }
-  }
-})
 </script>
 
 <style scoped>

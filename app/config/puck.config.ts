@@ -382,6 +382,9 @@ const BlankBlock = defineComponent({
 
 // ── Config ──
 
+/** Used for localStorage key (per-path data). Change when config shape changes. */
+export const puckComponentKey = 'puck-nuxt-v1'
+
 export const puckConfig = {
   categories: {
     layout: { title: 'Layout', components: ['Grid', 'Flex', 'Columns', 'Space'] },

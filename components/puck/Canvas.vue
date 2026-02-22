@@ -47,6 +47,15 @@
 
     <!-- Scrollable canvas area: min-width at 100% zoom so Large doesn't scroll -->
     <div ref="scrollAreaRef" class="puck-canvas__scroll" :style="scrollAreaStyle" @dragover.prevent @drop.prevent="handleDrop">
+      <!-- When iframe preview is enabled, show view page in iframe (published state) -->
+      <iframe
+        v-if="iframeEnabled"
+        :key="iframeSrc"
+        :src="iframeSrc"
+        class="puck-canvas__iframe"
+        title="Preview"
+      />
+      <template v-else>
       <div
         class="puck-canvas__frame"
         :style="frameStyle"
@@ -83,6 +92,7 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
   </main>
 </template>
@@ -99,7 +109,14 @@ const props = defineProps<{
   config: any
   selectedId: string | null
   hoveredId: string | null
+  iframeEnabled?: boolean
+  viewPath?: string
 }>()
+
+const iframeSrc = computed(() => {
+  const path = (props.viewPath ?? '/').replace(/\/+$/, '') || '/'
+  return path === '/' ? '/view' : `/view${path}`
+})
 
 const emit = defineEmits<{
   (e: 'select', id: string): void
@@ -425,6 +442,15 @@ function handleDrop(e: DragEvent) {
   padding: 0;
   padding-top: calc(var(--puck-space-px, 16px) * 0.75);
   min-width: 0;
+}
+
+.puck-canvas__iframe {
+  display: block;
+  width: 100%;
+  min-height: 80vh;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
 }
 @media (min-width: 640px) {
   .puck-canvas__scroll {

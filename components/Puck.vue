@@ -2,6 +2,7 @@
   <div class="puck-editor">
     <PuckHeader
       :title="rootTitle"
+      :header-path="props.headerPath"
       :can-undo="canUndo"
       :can-redo="canRedo"
       @undo="store.historyBack()"
@@ -9,7 +10,11 @@
       @publish="handlePublish"
       @toggle-json="showJsonPanel = !showJsonPanel"
       @open-help="showHelpModal = true"
-    />
+    >
+      <template #headerActions="{ path }">
+        <slot name="headerActions" :path="path" />
+      </template>
+    </PuckHeader>
 
     <PuckModal v-model="showHelpModal" title="Bantuan" :max-width="480">
       <div class="puck-help-content">
@@ -47,6 +52,8 @@
           :config="store.config"
           :selected-id="selectedId"
           :hovered-id="hoveredId"
+          :iframe-enabled="store.iframe?.enabled ?? false"
+          :view-path="props.headerPath ?? '/'"
           @select="selectById"
           @hover="hoveredId = $event"
           @deselect="deselectAll"
@@ -104,6 +111,9 @@ const props = defineProps<{
   config: any
   data: any
   metadata?: any
+  headerPath?: string
+  iframe?: { enabled?: boolean }
+  plugins?: any[]
 }>()
 
 const emit = defineEmits<{ (e: 'publish', data: any): void }>()
@@ -121,7 +131,13 @@ const copyLabel = ref('Copy')
 const showHelpModal = ref(false)
 
 onMounted(() => {
-  store.init({ config: props.config, data: props.data, metadata: props.metadata })
+  store.init({
+    config: props.config,
+    data: props.data,
+    metadata: props.metadata,
+    iframe: props.iframe ?? { enabled: false },
+    plugins: props.plugins ?? [],
+  })
   usePuckHotkeys()
 })
 

@@ -2,8 +2,18 @@
   <div class="puck-field">
     <label class="puck-field__label">{{ label }}</label>
 
+    <component
+      v-if="customFieldComponent"
+      :is="customFieldComponent"
+      :value="value"
+      :field="fieldConfig"
+      :name="fieldKey"
+      :read-only="false"
+      @change="(val: any) => $emit('change', val)"
+    />
+
     <select
-      v-if="fieldType === 'select'"
+      v-else-if="fieldType === 'select'"
       class="puck-field__input"
       :value="value"
       @change="onChange"
@@ -78,6 +88,8 @@ const props = defineProps<{
   fieldKey: string
   fieldConfig: any
   value: any
+  /** Vue component for custom field type (from overrides.fieldTypes) */
+  customFieldComponent?: any
 }>()
 
 const emit = defineEmits<{ (e: 'change', value: any): void }>()

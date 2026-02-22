@@ -28,6 +28,7 @@ import { generateId } from '~~/lib/puck/generate-id'
 import { getChanged } from '~~/lib/puck/get-changed'
 import { makeStatePublic } from '~~/lib/puck/data/make-state-public'
 import { flattenData } from '~~/lib/puck/data/flatten-data'
+import { useLoadedOverrides } from '~~/composables/puck/useLoadedOverrides'
 
 export type Status = 'LOADING' | 'MOUNTED' | 'READY'
 
@@ -143,13 +144,15 @@ export const usePuckStore = defineStore('puck', {
       overrides?: Partial<Overrides>
       iframe?: IframeConfig
       metadata?: Metadata
+      fieldTransforms?: Record<string, (p: any) => any>
       onAction?: (action: PuckAction, newState: AppState, prevState: AppState) => void
     }) {
       this.config = initial.config
       if (initial.plugins) this.plugins = initial.plugins
-      if (initial.overrides) this.overrides = initial.overrides
+      this.overrides = useLoadedOverrides(initial.plugins ?? [], initial.overrides ?? {})
       if (initial.iframe) this.iframe = initial.iframe
       if (initial.metadata) this.metadata = initial.metadata ?? {}
+      if (initial.fieldTransforms) this.fieldTransforms = initial.fieldTransforms
       if (initial.onAction) this.onAction = initial.onAction
 
       let baseState: PrivateAppState = { ...defaultAppState } as PrivateAppState

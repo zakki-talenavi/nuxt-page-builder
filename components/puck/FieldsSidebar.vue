@@ -28,7 +28,8 @@
         :key="field.key"
         :field-key="field.key"
         :field-config="field.config"
-        :value="selectedItem.props?.[field.key]"
+        :value="transformedValue(selectedItem.props?.[field.key], field.config?.type)"
+        :custom-field-component="customFieldComponent(field.config?.type)"
         @change="(val: any) => $emit('fieldChange', field.key, val)"
       />
     </div>
@@ -39,7 +40,8 @@
         :key="field.key"
         :field-key="field.key"
         :field-config="field.config"
-        :value="rootProps?.[field.key]"
+        :value="transformedValue(rootProps?.[field.key], field.config?.type)"
+        :custom-field-component="customFieldComponent(field.config?.type)"
         @change="(val: any) => $emit('rootFieldChange', field.key, val)"
       />
     </div>
@@ -99,6 +101,17 @@ const pageFields = computed(() => {
   const fields = props.config?.root?.fields || {}
   return Object.entries(fields).map(([key, config]: [string, any]) => ({ key, config }))
 })
+
+function transformedValue(value: any, fieldType: string | undefined) {
+  if (!fieldType) return value
+  const transform = store.fieldTransforms?.[fieldType]
+  return transform ? transform(value) : value
+}
+
+function customFieldComponent(fieldType: string | undefined) {
+  if (!fieldType) return undefined
+  return (store.overrides as any)?.fieldTypes?.[fieldType]
+}
 </script>
 
 <style scoped>
