@@ -263,13 +263,15 @@ const containerStyle = computed(() => {
   }
   if (type === 'Flex') {
     const jc = p.justifyContent === 'start' ? 'flex-start' : p.justifyContent === 'end' ? 'flex-end' : p.justifyContent
+    const verticalPadding = p.layout?.verticalPadding ?? '0px'
     return {
       display: 'flex',
       flexDirection: p.direction || 'row',
       justifyContent: jc || 'flex-start',
       gap: `${p.gap || 24}px`,
       flexWrap: p.wrap || 'wrap',
-      padding: '8px',
+      paddingTop: verticalPadding,
+      paddingBottom: verticalPadding,
       minHeight: '60px',
     }
   }

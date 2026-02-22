@@ -273,20 +273,28 @@ const FlexBlock = defineComponent({
     justifyContent: { type: String, default: 'start' },
     gap: { type: Number, default: 24 },
     wrap: { type: String, default: 'wrap' },
+    layout: {
+      type: Object as () => { verticalPadding?: string },
+      default: () => ({ verticalPadding: '0px' }),
+    },
   },
   setup(props, { slots }) {
-    return () =>
-      h('div', {
+    return () => {
+      const verticalPadding = props.layout?.verticalPadding ?? '0px'
+      const jc = props.justifyContent === 'start' ? 'flex-start' : props.justifyContent === 'end' ? 'flex-end' : props.justifyContent
+      return h('div', {
         style: {
           display: 'flex',
           flexDirection: props.direction,
-          justifyContent: props.justifyContent === 'start' ? 'flex-start' : props.justifyContent === 'end' ? 'flex-end' : props.justifyContent,
+          justifyContent: jc,
           gap: `${props.gap}px`,
           flexWrap: props.wrap,
-          padding: '8px 0',
+          paddingTop: verticalPadding,
+          paddingBottom: verticalPadding,
           minHeight: '60px',
         },
       }, slots.default?.() || [])
+    }
   },
 })
 
@@ -660,20 +668,40 @@ export const puckConfig = {
     },
     Flex: {
       label: 'Flex',
-      defaultProps: { direction: 'row', justifyContent: 'start', gap: 24, wrap: 'wrap' },
+      defaultProps: {
+        direction: 'row',
+        justifyContent: 'start',
+        gap: 24,
+        wrap: 'wrap',
+        layout: { verticalPadding: '0px' },
+      },
       fields: {
         direction: {
-          type: 'radio', label: 'Direction',
+          type: 'radio',
+          label: 'Direction',
           options: [{ label: 'Row', value: 'row' }, { label: 'Column', value: 'column' }],
         },
         justifyContent: {
-          type: 'radio', label: 'Justify',
+          type: 'radio',
+          label: 'Justify Content',
           options: [{ label: 'Start', value: 'start' }, { label: 'Center', value: 'center' }, { label: 'End', value: 'end' }],
         },
-        gap: { type: 'number', label: 'Gap (px)', min: 0 },
+        gap: { type: 'number', label: 'Gap', min: 0 },
         wrap: {
-          type: 'radio', label: 'Wrap',
-          options: [{ label: 'Wrap', value: 'wrap' }, { label: 'No wrap', value: 'nowrap' }],
+          type: 'radio',
+          label: 'Wrap',
+          options: [{ label: 'true', value: 'wrap' }, { label: 'false', value: 'nowrap' }],
+        },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            verticalPadding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
+            },
+          },
         },
       },
       render: markRaw(FlexBlock),
