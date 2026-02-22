@@ -90,8 +90,8 @@
 </template>
 
 <script setup lang="ts">
-import type { FormFieldSchema } from '@@/composables/useFormSchema'
-import { useFormSchema } from '@@/composables/useFormSchema'
+import type { FormFieldSchema } from '~~/composables/useFormSchema'
+import { useFormSchema } from '~~/composables/useFormSchema'
 
 const props = withDefaults(
   defineProps<{

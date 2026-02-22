@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePuckStore } from '@@/stores/puck'
+import { usePuckStore } from '~~/stores/puck'
 
 const store = usePuckStore()
 

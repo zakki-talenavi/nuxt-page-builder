@@ -142,9 +142,9 @@ const RichTextBlock = defineComponent({
 })
 
 // ── Button (Vue SFC: link + custom modal) ──
-import ButtonBlockVue from '@@/components/puck/blocks/ButtonBlock.vue'
+import ButtonBlockVue from '~~/components/puck/blocks/ButtonBlock.vue'
 // ── Breadcrumb (PrimeVue: icon + URL per item) ──
-import BreadcrumbBlockVue from '@@/components/puck/blocks/BreadcrumbBlock.vue'
+import BreadcrumbBlockVue from '~~/components/puck/blocks/BreadcrumbBlock.vue'
 
 // ── Card ──
 

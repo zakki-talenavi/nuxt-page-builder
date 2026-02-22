@@ -1,7 +1,7 @@
-import type { Data } from '@@/types/puck'
+import type { Data } from '~~/types/puck'
 import type { RemoveAction } from '../actions'
-import type { PuckStoreLike } from '@@/types/puck/store'
-import type { PrivateAppState } from '@@/types/puck'
+import type { PuckStoreLike } from '~~/types/puck/store'
+import type { PrivateAppState } from '~~/types/puck'
 import { remove } from '../../data/remove'
 import { getItem } from '../../data/get-item'
 import { walkAppState } from '../../data/walk-app-state'
@@ -14,7 +14,7 @@ export const removeAction = <UserData extends Data>(
   const item = getItem({ index: action.index, zone: action.zone }, state)!
   const nodesToDelete = Object.entries(state.indexes.nodes).reduce<string[]>(
     (acc, [nodeId, nodeData]) => {
-      const pathIds = nodeData.path.map((p) => p.split(':')[0] as string)
+      const pathIds = (nodeData as any).path.map((p: any) => p.split(':')[0] as string)
       if (item.props.id && pathIds.includes(item.props.id)) return [...acc, nodeId]
       return acc
     },

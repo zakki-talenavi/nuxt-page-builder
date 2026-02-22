@@ -88,8 +88,8 @@
 </template>
 
 <script setup lang="ts">
-import { usePuckStore } from '@@/stores/puck'
-import { rootDroppableId } from '@@/lib/puck/root-droppable-id'
+import { usePuckStore } from '~~/stores/puck'
+import { rootDroppableId } from '~~/lib/puck/root-droppable-id'
 
 const store = usePuckStore()
 const rootZone = rootDroppableId

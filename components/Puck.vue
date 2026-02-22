@@ -96,9 +96,9 @@
 </template>
 
 <script setup lang="ts">
-import { usePuckStore } from '@@/stores/puck'
-import { rootDroppableId } from '@@/lib/puck/root-droppable-id'
-import { usePuckHotkeys } from '@@/composables/puck/usePuckHotkeys'
+import { usePuckStore } from '~~/stores/puck'
+import { rootDroppableId } from '~~/lib/puck/root-droppable-id'
+import { usePuckHotkeys } from '~~/composables/puck/usePuckHotkeys'
 
 const props = defineProps<{
   config: any

@@ -1,4 +1,4 @@
-import type { Data } from '@@/types/puck'
+import type { Data } from '~~/types/puck'
 import { rootDroppableId } from '../root-droppable-id'
 
 type WithZones<T extends Data> = T & { zones: NonNullable<T['zones']> }

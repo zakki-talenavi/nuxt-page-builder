@@ -17,7 +17,7 @@ export type ResolveDataTrigger = 'insert' | 'replace' | 'load' | 'force' | 'move
 
 type WithPartialProps<T, Props extends DefaultComponentProps> = Omit<T, 'props'> & { props?: Partial<Props> }
 
-export interface ComponentConfigExtensions {}
+export interface ComponentConfigExtensions { }
 
 type ComponentConfigInternal<
   RenderProps extends DefaultComponentProps,
@@ -74,8 +74,8 @@ export type ComponentConfig<
 > = RenderPropsOrParams extends ComponentConfigParams<infer ParamsRenderProps, never>
   ? ComponentConfigInternal<ParamsRenderProps, FieldProps, DataShape, {}>
   : RenderPropsOrParams extends ComponentConfigParams<infer ParamsRenderProps, infer ParamsFields>
-    ? ComponentConfigInternal<ParamsRenderProps, FieldProps, DataShape, ParamsFields[keyof ParamsFields] & BaseField>
-    : ComponentConfigInternal<RenderPropsOrParams, FieldProps, DataShape>
+  ? ComponentConfigInternal<ParamsRenderProps, FieldProps, DataShape, ParamsFields[keyof ParamsFields] & BaseField>
+  : ComponentConfigInternal<RenderPropsOrParams, FieldProps, DataShape>
 
 type RootConfigInternal<
   RootProps extends DefaultComponentProps = DefaultComponentProps,
@@ -94,8 +94,8 @@ export type RootConfig<
 > = RootPropsOrParams extends ComponentConfigParams<infer Props, never>
   ? Partial<RootConfigInternal<WithChildren<Props>, {}>>
   : RootPropsOrParams extends ComponentConfigParams<infer Props, infer UserFields>
-    ? Partial<RootConfigInternal<WithChildren<Props>, UserFields[keyof UserFields] & BaseField>>
-    : Partial<RootConfigInternal<WithChildren<RootPropsOrParams>>>
+  ? Partial<RootConfigInternal<WithChildren<Props>, UserFields[keyof UserFields] & BaseField>>
+  : Partial<RootConfigInternal<WithChildren<RootPropsOrParams>>>
 
 type Category<ComponentName> = {
   components?: ComponentName[]
@@ -128,23 +128,23 @@ export type ConfigInternal<
 export type DefaultComponents = Record<string, any>
 
 export type Config<
-  PropsOrParams extends LeftOrExactRight<PropsOrParams, DefaultComponents, ConfigParams> = DefaultComponents,
+  PropsOrParams extends LeftOrExactRight<PropsOrParams, DefaultComponents, ConfigParams> = any,
   RootProps extends DefaultComponentProps = any,
   CategoryName extends string = string
 > = PropsOrParams extends ConfigParams<infer ParamComponents, infer ParamRoot, infer ParamCategoryName, never>
   ? ConfigInternal<ParamComponents, ParamRoot, ParamCategoryName[number]>
   : PropsOrParams extends ConfigParams<infer ParamComponents, infer ParamRoot, infer ParamCategoryName, infer ParamFields>
-    ? ConfigInternal<ParamComponents, ParamRoot, ParamCategoryName[number], ParamFields[keyof ParamFields] & BaseField>
-    : PropsOrParams extends ConfigParams<infer ParamComponents, infer ParamRoot, infer ParamCategoryName, any>
-      ? ConfigInternal<ParamComponents, ParamRoot, ParamCategoryName[number], {}>
-      : ConfigInternal<PropsOrParams, RootProps, CategoryName>
+  ? ConfigInternal<ParamComponents, ParamRoot, ParamCategoryName[number], ParamFields[keyof ParamFields] & BaseField>
+  : PropsOrParams extends ConfigParams<infer ParamComponents, infer ParamRoot, infer ParamCategoryName, any>
+  ? ConfigInternal<ParamComponents, ParamRoot, ParamCategoryName[number], {}>
+  : ConfigInternal<PropsOrParams, RootProps, CategoryName>
 
 export type ExtractConfigParams<UserConfig extends ConfigInternal> =
   UserConfig extends ConfigInternal<infer PropsOrParams, infer RootProps, infer CategoryName, infer UserField>
-    ? {
-        props: PropsOrParams
-        rootProps: RootProps & DefaultRootFieldProps
-        categoryNames: CategoryName
-        field: UserField extends { type: string } ? UserField : Field
-      }
-    : never
+  ? {
+    props: PropsOrParams
+    rootProps: RootProps & DefaultRootFieldProps
+    categoryNames: CategoryName
+    field: UserField extends { type: string } ? UserField : Field
+  }
+  : never

@@ -1,4 +1,4 @@
-import type { ComponentData, RootData } from '@@/types/puck'
+import type { ComponentData, RootData } from '~~/types/puck'
 
 export const toComponent = (item: ComponentData | RootData): ComponentData => {
   return 'type' in item

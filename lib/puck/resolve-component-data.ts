@@ -5,7 +5,7 @@ import type {
   Metadata,
   ResolveDataTrigger,
   RootDataWithProps,
-} from '@@/types/puck'
+} from '~~/types/puck'
 import { mapFields } from './data/map-fields'
 import { toComponent } from './data/to-component'
 import { getChanged } from './get-changed'

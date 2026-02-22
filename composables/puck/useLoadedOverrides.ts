@@ -1,4 +1,4 @@
-import type { Overrides, Plugin } from '@@/types/puck'
+import type { Overrides, Plugin } from '~~/types/puck'
 
 export function useLoadedOverrides(
   plugins: Plugin[],

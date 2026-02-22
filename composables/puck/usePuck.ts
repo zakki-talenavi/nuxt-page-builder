@@ -1,4 +1,4 @@
-import { usePuckStore } from '@@/stores/puck'
+import { usePuckStore } from '~~/stores/puck'
 
 export function usePuck() {
   const store = usePuckStore()

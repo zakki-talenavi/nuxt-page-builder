@@ -1,5 +1,5 @@
 import { getZoneId } from './get-zone-id'
-import type { Data, Content } from '@@/types/puck'
+import type { Data, Content } from '~~/types/puck'
 
 export const groupZonesByComponent = (data: Data) => {
   const zoneEntries = Object.entries(data.zones ?? {})

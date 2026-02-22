@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePuckStore } from '@@/stores/puck'
+import { usePuckStore } from '~~/stores/puck'
 
 const props = defineProps<{
   componentList: { key: string; label: string }[]

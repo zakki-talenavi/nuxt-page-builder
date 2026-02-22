@@ -1,4 +1,4 @@
-import type { Data, PrivateAppState } from '@@/types/puck'
+import type { Data, PrivateAppState } from '~~/types/puck'
 import { rootDroppableId } from '../root-droppable-id'
 
 export type ItemSelector = { index: number; zone?: string }

@@ -11,6 +11,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
+import { watch, onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
   modelValue: string
@@ -33,7 +34,7 @@ const editor = useEditor({
   },
 })
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, (val: string) => {
   if (editor.value && val !== editor.value.getHTML()) {
     editor.value.commands.setContent(val || '', false as any)
   }

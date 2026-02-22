@@ -1,7 +1,7 @@
-import type { AppState, Data } from '@@/types/puck'
-import type { OnAction } from '@@/types/puck'
-import type { PrivateAppState } from '@@/types/puck'
-import type { PuckStoreLike } from '@@/types/puck/store'
+import type { AppState, Data } from '~~/types/puck'
+import type { OnAction } from '~~/types/puck'
+import type { PrivateAppState } from '~~/types/puck'
+import type { PuckStoreLike } from '~~/types/puck/store'
 import { makeStatePublic } from '../data/make-state-public'
 
 export * from './actions'

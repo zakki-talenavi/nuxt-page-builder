@@ -15,19 +15,19 @@ import type {
   History,
   Permissions,
   PrivateAppState,
-} from '@@/types/puck'
-import type { PuckAction } from '@@/lib/puck/reducer/actions'
-import { createReducer } from '@@/lib/puck/reducer'
-import { getItem } from '@@/lib/puck/data/get-item'
-import { defaultViewports } from '@@/lib/puck/default-viewports'
-import { defaultAppState } from '@@/lib/puck/default-app-state'
-import { resolveComponentData } from '@@/lib/puck/resolve-component-data'
-import { walkAppState } from '@@/lib/puck/data/walk-app-state'
-import { toRoot } from '@@/lib/puck/data/to-root'
-import { generateId } from '@@/lib/puck/generate-id'
-import { getChanged } from '@@/lib/puck/get-changed'
-import { makeStatePublic } from '@@/lib/puck/data/make-state-public'
-import { flattenData } from '@@/lib/puck/data/flatten-data'
+} from '~~/types/puck'
+import type { PuckAction } from '~~/lib/puck/reducer/actions'
+import { createReducer } from '~~/lib/puck/reducer'
+import { getItem } from '~~/lib/puck/data/get-item'
+import { defaultViewports } from '~~/lib/puck/default-viewports'
+import { defaultAppState } from '~~/lib/puck/default-app-state'
+import { resolveComponentData } from '~~/lib/puck/resolve-component-data'
+import { walkAppState } from '~~/lib/puck/data/walk-app-state'
+import { toRoot } from '~~/lib/puck/data/to-root'
+import { generateId } from '~~/lib/puck/generate-id'
+import { getChanged } from '~~/lib/puck/get-changed'
+import { makeStatePublic } from '~~/lib/puck/data/make-state-public'
+import { flattenData } from '~~/lib/puck/data/flatten-data'
 
 export type Status = 'LOADING' | 'MOUNTED' | 'READY'
 
@@ -301,7 +301,7 @@ export const usePuckStore = defineStore('puck', {
         this.config,
         this.metadata,
         () => { },
-        async (item: ComponentData) => {
+        async (item: ComponentData | RootDataWithProps) => {
           unsetLoading()
           const id = 'id' in item.props ? item.props.id : 'root'
           if ('type' in item) await this.refreshPermissions({ item: item as ComponentData })

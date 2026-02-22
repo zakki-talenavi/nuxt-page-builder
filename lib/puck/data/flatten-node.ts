@@ -1,5 +1,5 @@
 import { flatten, unflatten } from 'flat'
-import type { ComponentData, Config, RootData, UserGenerics } from '@@/types/puck'
+import type { ComponentData, Config, RootData, UserGenerics } from '~~/types/puck'
 import { stripSlots } from './strip-slots'
 
 const isPureObject = (val: any) =>

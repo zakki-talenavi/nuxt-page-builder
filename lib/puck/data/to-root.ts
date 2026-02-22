@@ -1,4 +1,4 @@
-import type { ComponentData, RootData } from '@@/types/puck'
+import type { ComponentData, RootData } from '~~/types/puck'
 
 export const toRoot = (item: ComponentData | RootData): RootData => {
   if ('type' in item && item.type !== 'root') {

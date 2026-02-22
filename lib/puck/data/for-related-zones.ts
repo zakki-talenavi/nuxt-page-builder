@@ -1,4 +1,4 @@
-import type { Content, Data } from '@@/types/puck'
+import type { Content, Data } from '~~/types/puck'
 import { getZoneId } from '../get-zone-id'
 
 export function forRelatedZones<UserData extends Data>(

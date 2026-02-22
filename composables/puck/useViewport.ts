@@ -1,4 +1,4 @@
-import { usePuckStore } from '@@/stores/puck'
+import { usePuckStore } from '~~/stores/puck'
 
 export function useViewport() {
   const store = usePuckStore()

@@ -1,4 +1,4 @@
-import type { ComponentData, ComponentDataOptionalId, Config } from '@@/types/puck'
+import type { ComponentData, ComponentDataOptionalId, Config } from '~~/types/puck'
 import { generateId } from '../generate-id'
 import { walkTree } from './walk-tree'
 

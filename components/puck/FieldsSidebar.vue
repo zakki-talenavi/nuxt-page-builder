@@ -47,7 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import { usePuckStore } from '@@/stores/puck'
+import { usePuckStore } from '~~/stores/puck'
+import { computed } from 'vue'
 
 const store = usePuckStore()
 

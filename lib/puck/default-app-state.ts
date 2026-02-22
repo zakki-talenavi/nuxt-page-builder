@@ -1,4 +1,4 @@
-import type { PrivateAppState } from '@@/types/puck'
+import type { PrivateAppState } from '~~/types/puck'
 import { defaultViewports } from './default-viewports'
 
 export const defaultAppState: PrivateAppState = {

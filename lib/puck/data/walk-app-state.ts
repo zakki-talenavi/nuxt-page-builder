@@ -6,8 +6,8 @@ import type {
   Content,
   Data,
   RootDataWithProps,
-} from '@@/types/puck'
-import type { NodeIndex, PrivateAppState, ZoneIndex, ZoneType } from '@@/types/puck'
+} from '~~/types/puck'
+import type { NodeIndex, PrivateAppState, ZoneIndex, ZoneType } from '~~/types/puck'
 import { mapFields } from './map-fields'
 import { flattenNode } from './flatten-node'
 
@@ -41,12 +41,12 @@ export function walkAppState<UserData extends Data = Data>(
     const [, zone] = zoneCompound.split(':')
     const newZoneCompound = `${newId || parentId}:${zone}`
 
-    const newContent = mappedContent.map((zoneChild, index) =>
+    const newContent = mappedContent.map((zoneChild: any, index: number) =>
       processItem(zoneChild, [...path, newZoneCompound], index)
     )
 
     newZoneIndex[newZoneCompound] = {
-      contentIds: newContent.map((item) => item.props.id),
+      contentIds: newContent.map((item: any) => item.props.id),
       type: zoneType,
     }
 

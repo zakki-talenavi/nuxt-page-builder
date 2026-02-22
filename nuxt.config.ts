@@ -13,6 +13,7 @@ export default defineNuxtConfig({
 
   alias: {
     '~/config': resolve(__rootDir, 'app/config'),
+    '@@': resolve(__rootDir),
   },
 
   components: [
@@ -28,6 +29,12 @@ export default defineNuxtConfig({
 
   dir: {
     layouts: '../layouts',
+  },
+
+  typescript: {
+    tsConfig: {
+      include: ['../lib/**/*', '../types/**/*'],
+    },
   },
 
   primevue: {

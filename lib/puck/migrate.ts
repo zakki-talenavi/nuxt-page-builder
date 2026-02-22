@@ -1,4 +1,4 @@
-import type { ComponentData, Config, Content, Data, UserGenerics, WithId } from '@@/types/puck'
+import type { ComponentData, Config, Content, Data, UserGenerics, WithId } from '~~/types/puck'
 import { defaultAppState } from './default-app-state'
 import { walkAppState } from './data/walk-app-state'
 import { walkTree } from './data/walk-tree'

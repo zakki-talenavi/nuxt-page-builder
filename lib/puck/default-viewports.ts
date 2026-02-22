@@ -1,4 +1,4 @@
-import type { Viewports } from '@@/types/puck'
+import type { Viewports } from '~~/types/puck'
 
 export const defaultViewports: Required<Viewports> = [
   { width: 360, height: 'auto', icon: 'Smartphone', label: 'Small' },

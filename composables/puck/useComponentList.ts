@@ -1,4 +1,4 @@
-import type { Config, UiState } from '@@/types/puck'
+import type { Config, UiState } from '~~/types/puck'
 
 export type ComponentListItem = {
   key: string

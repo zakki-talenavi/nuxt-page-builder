@@ -5,9 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import { useDragState } from '@@/composables/puck/useDragState'
-import { usePuckStore } from '@@/stores/puck'
-import { rootDroppableId } from '@@/lib/puck/root-droppable-id'
+import { useDragState } from '~~/composables/puck/useDragState'
+import { usePuckStore } from '~~/stores/puck'
+import { rootDroppableId } from '~~/lib/puck/root-droppable-id'
 
 const store = usePuckStore()
 const { isDragging } = useDragState()

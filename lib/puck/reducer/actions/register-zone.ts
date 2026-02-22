@@ -1,6 +1,6 @@
-import type { Content, Data } from '@@/types/puck'
+import type { Content, Data } from '~~/types/puck'
 import type { RegisterZoneAction, UnregisterZoneAction } from '../actions'
-import type { PrivateAppState } from '@@/types/puck'
+import type { PrivateAppState } from '~~/types/puck'
 import { setupZone } from '../../data/setup-zone'
 
 export const zoneCache: Record<string, Content> = {}
@@ -29,7 +29,7 @@ export function registerZoneAction<UserData extends Data>(
           ...state.indexes.zones,
           [action.zone]: {
             ...(state.indexes.zones[action.zone] || {}),
-            contentIds: (zoneCache[action.zone] || []).map((item) => item.props.id),
+            contentIds: (zoneCache[action.zone] || []).map((item: any) => item.props.id),
             type: 'dropzone',
           },
         },

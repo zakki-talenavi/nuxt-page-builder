@@ -1,7 +1,7 @@
-import type { Data } from '@@/types/puck'
+import type { Data } from '~~/types/puck'
 import type { ReorderAction } from '../actions'
-import type { PuckStoreLike } from '@@/types/puck/store'
-import type { PrivateAppState } from '@@/types/puck'
+import type { PuckStoreLike } from '~~/types/puck/store'
+import type { PrivateAppState } from '~~/types/puck'
 import { moveAction } from './move'
 
 export const reorderAction = <UserData extends Data>(

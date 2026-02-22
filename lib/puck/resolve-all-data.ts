@@ -7,7 +7,7 @@ import type {
   DefaultRootFieldProps,
   Metadata,
   RootData,
-} from '@@/types/puck'
+} from '~~/types/puck'
 import { resolveComponentData } from './resolve-component-data'
 import { groupZonesByComponent } from './group-zones-by-component'
 import { defaultData } from './data/default-data'
