@@ -14,8 +14,8 @@ export const removeAction = <UserData extends Data>(
   const item = getItem({ index: action.index, zone: action.zone }, state)!
   const nodesToDelete = Object.entries(state.indexes.nodes).reduce<string[]>(
     (acc, [nodeId, nodeData]) => {
-      const pathIds = nodeData.path.map((p) => p.split(':')[0])
-      if (pathIds.includes(item.props.id)) return [...acc, nodeId]
+      const pathIds = nodeData.path.map((p) => p.split(':')[0] as string)
+      if (item.props.id && pathIds.includes(item.props.id)) return [...acc, nodeId]
       return acc
     },
     [item.props.id]
@@ -33,14 +33,14 @@ export const removeAction = <UserData extends Data>(
   )
 
   Object.keys(newState.data.zones || {}).forEach((zoneCompound) => {
-    const parentId = zoneCompound.split(':')[0]
+    const parentId = zoneCompound.split(':')[0] as string
     if (nodesToDelete.includes(parentId) && newState.data.zones) {
       delete (newState.data.zones as any)[zoneCompound]
     }
   })
 
   Object.keys(newState.indexes.zones).forEach((zoneCompound) => {
-    const parentId = zoneCompound.split(':')[0]
+    const parentId = zoneCompound.split(':')[0] as string
     if (nodesToDelete.includes(parentId)) {
       delete (newState.indexes.zones as any)[zoneCompound]
     }

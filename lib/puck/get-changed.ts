@@ -7,15 +7,15 @@ export const getChanged = (
 ) => {
   return newItem
     ? Object.keys(newItem.props || {}).reduce(
-        (acc, item) => {
-          const newItemProps = newItem?.props || {}
-          const oldItemProps = (oldItem as any)?.props || {}
-          return {
-            ...acc,
-            [item]: !deepEqual(oldItemProps[item], newItemProps[item]),
-          }
-        },
-        {} as Record<string, boolean>
-      )
+      (acc, item: string) => {
+        const newItemProps = newItem?.props || {}
+        const oldItemProps = (oldItem as any)?.props || {}
+        return {
+          ...acc,
+          [item]: !deepEqual(oldItemProps[item], newItemProps[item]),
+        }
+      },
+      {} as Record<string, boolean>
+    )
     : {}
 }

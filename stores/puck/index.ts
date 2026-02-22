@@ -195,7 +195,7 @@ export const usePuckStore = defineStore('puck', {
       this.histories = [{ state: makeStatePublic(this.state as any), id: generateId('history') }]
       this.historyIndex = 0
       this.selectedItem = this.state.ui.itemSelector
-        ? getItem(this.state.ui.itemSelector, this.state as any)
+        ? (getItem(this.state.ui.itemSelector, this.state as any) as ComponentData | null)
         : null
       this.status = 'READY'
     },
@@ -203,8 +203,8 @@ export const usePuckStore = defineStore('puck', {
     dispatch(action: PuckAction) {
       const self = this
       if (!(self as any)._recordHistoryDebounced) {
-        (self as any)._recordHistoryDebounced = debounce((appState: AppState) => {
-          const history = { state: appState, id: generateId('history') }
+        (self as any)._recordHistoryDebounced = debounce((appState: any) => {
+          const history = { state: makeStatePublic(appState), id: generateId('history') }
           self.histories = [...self.histories.slice(0, self.historyIndex + 1), history]
           self.historyIndex = self.histories.length - 1
         }, 250)
@@ -220,19 +220,19 @@ export const usePuckStore = defineStore('puck', {
       const newState = reducer(this.state as any, action)
       this.state = newState as PrivateAppState
       this.selectedItem = newState.ui.itemSelector
-        ? getItem(newState.ui.itemSelector, newState)
+        ? (getItem(newState.ui.itemSelector, newState) as ComponentData | null)
         : null
     },
 
     setUi(ui: Partial<UiState>, recordHistory?: boolean) {
       const reducer = createReducer({
-        record: () => {},
+        record: () => { },
         appStore: { config: this.config },
       })
       const newState = reducer(this.state as any, { type: 'setUi', ui, recordHistory })
       this.state = newState as PrivateAppState
       this.selectedItem = newState.ui.itemSelector
-        ? getItem(newState.ui.itemSelector, newState)
+        ? (getItem(newState.ui.itemSelector, newState) as ComponentData | null)
         : null
     },
 
@@ -300,8 +300,8 @@ export const usePuckStore = defineStore('puck', {
         componentData,
         this.config,
         this.metadata,
-        () => {},
-        async (item) => {
+        () => { },
+        async (item: ComponentData) => {
           unsetLoading()
           const id = 'id' in item.props ? item.props.id : 'root'
           if ('type' in item) await this.refreshPermissions({ item: item as ComponentData })
@@ -317,8 +317,8 @@ export const usePuckStore = defineStore('puck', {
       walkAppState(
         this.state as any,
         this.config,
-        (content) => content,
-        (childItem) => {
+        (content: any) => content,
+        (childItem: any) => {
           this.resolveComponentData(childItem, 'load').then((resolved) => {
             const state = this.state as any
             const node = state.indexes?.nodes[resolved.node.props.id]
@@ -360,7 +360,7 @@ export const usePuckStore = defineStore('puck', {
     registerNode(id: string, node: Partial<PuckNodeInstance>) {
       const empty: PuckNodeInstance = {
         id,
-        methods: { sync: () => {}, hideOverlay: () => {}, showOverlay: () => {} },
+        methods: { sync: () => { }, hideOverlay: () => { }, showOverlay: () => { } },
         element: null,
       }
       this.nodes = {
@@ -398,7 +398,7 @@ export const usePuckStore = defineStore('puck', {
 
     async refreshPermissions(params?: { item?: ComponentData; root?: boolean }) {
       if (!params?.item && !params?.root) {
-        flattenData(this.state as any, this.config).forEach((item) => {
+        flattenData(this.state as any, this.config).forEach((item: ComponentData) => {
           this.refreshPermissions({ item })
         })
         return

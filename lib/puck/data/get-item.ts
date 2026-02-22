@@ -8,5 +8,5 @@ export function getItem<UserData extends Data>(
   state: PrivateAppState
 ): UserData['content'][0] | undefined {
   const zone = state.indexes.zones?.[selector.zone || rootDroppableId]
-  return zone ? state.indexes.nodes[zone.contentIds[selector.index]]?.data : undefined
+  return zone ? state.indexes.nodes[zone.contentIds[selector.index] || '']?.data : undefined
 }

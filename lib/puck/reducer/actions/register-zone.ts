@@ -29,7 +29,7 @@ export function registerZoneAction<UserData extends Data>(
           ...state.indexes.zones,
           [action.zone]: {
             ...(state.indexes.zones[action.zone] || {}),
-            contentIds: zoneCache[action.zone].map((item) => item.props.id),
+            contentIds: (zoneCache[action.zone] || []).map((item) => item.props.id),
             type: 'dropzone',
           },
         },
@@ -47,7 +47,7 @@ export function unregisterZoneAction<UserData extends Data>(
   const zoneIndex = { ...(state.indexes.zones || {}) }
 
   if (_zones[action.zone]) {
-    zoneCache[action.zone] = _zones[action.zone]
+    zoneCache[action.zone] = _zones[action.zone] || []
     delete (_zones as any)[action.zone]
   }
 

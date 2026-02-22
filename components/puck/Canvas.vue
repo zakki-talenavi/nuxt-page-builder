@@ -11,7 +11,7 @@
           v-for="vp in viewports"
           :key="vp.label"
           class="puck-vp-btn"
-          :class="{ active: currentViewport.label === vp.label }"
+          :class="{ active: currentViewport?.label === vp.label }"
           :title="vp.label"
           @click="setViewport(vp)"
         >
@@ -127,7 +127,7 @@ const ZOOM_OPTIONS = [25, 50, 75, 100, 125, 150, 200]
 const MIN_ZOOM = ZOOM_OPTIONS[0]!
 const MAX_ZOOM = ZOOM_OPTIONS[ZOOM_OPTIONS.length - 1]!
 
-const currentViewport = ref(viewports[3])
+const currentViewport = ref<(typeof viewports)[number]>(viewports[3]!)
 const zoomLevel = ref(100)
 
 /** Options for dropdown: fixed steps + current value as "(Auto)" if not in list */
@@ -174,7 +174,7 @@ function resetZoom() {
 function autoFitZoom() {
   const el = scrollAreaRef.value
   if (!el) { zoomLevel.value = 100; return }
-  const w = currentViewport.value.width
+  const w = currentViewport.value?.width
   if (w === '100%') { zoomLevel.value = 100; return }
   const available = el.clientWidth - 48
   const ratio = Math.min(available / (w as number), 1)
@@ -185,7 +185,7 @@ function autoFitZoom() {
 }
 
 const viewportBreakpoint = computed(() => {
-  const w = currentViewport.value.width
+  const w = currentViewport.value?.width
   if (w === '100%') return 'full'
   if (w <= 360) return 'mobile'
   if (w <= 768) return 'tablet'
@@ -193,7 +193,7 @@ const viewportBreakpoint = computed(() => {
 })
 
 const viewportStyle = computed(() => {
-  const w = currentViewport.value.width
+  const w = currentViewport.value?.width
   return {
     width: w === '100%' ? '100%' : `${w}px`,
     minHeight: '100%',
@@ -241,7 +241,7 @@ function throttledAutoFitZoom() {
   resizeRaf = requestAnimationFrame(() => {
     resizeRaf = null
     const el = scrollAreaRef.value
-    if (!el || currentViewport.value.width === '100%') return
+    if (!el || currentViewport.value?.width === '100%') return
     const w = el.clientWidth
     const h = el.clientHeight
     if (w === lastScrollAreaWidth && h === lastScrollAreaHeight) return

@@ -14,8 +14,7 @@ export const replaceAction = <UserData extends Data>(
 ): PrivateAppState<UserData> => {
   const [parentId] = action.destinationZone.split(':')
   const idsInPath = getIdsForParent(action.destinationZone, state)
-  const originalId =
-    state.indexes.zones[action.destinationZone].contentIds[action.destinationIndex]
+  const originalId = state.indexes.zones[action.destinationZone]?.contentIds?.[action.destinationIndex]
 
   if (originalId !== action.data.props.id) {
     throw new Error(

@@ -17,7 +17,7 @@
     <PuckBreadcrumbs
       v-if="selectedItem && crumbs.length > 1"
       :crumbs="crumbs"
-      @navigate="(id: string) => $emit('deselect')"
+      @navigate="(id: string) => id === 'root' ? $emit('deselect') : store.dispatch({ type: 'setUi', ui: { itemSelector: { index: 0, zone: id } } })"
     />
 
     <div v-if="rightPanel === 'component' && selectedItem" class="puck-sidebar__content">

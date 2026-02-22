@@ -50,7 +50,7 @@ function storeInterceptor<UserData extends Data = Data>(
         : isValidType) &&
       record
     ) {
-      record(makeStatePublic(newAppState))
+      record(newAppState)
     }
 
     onAction?.(action, makeStatePublic(newAppState), makeStatePublic(state))

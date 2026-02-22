@@ -61,25 +61,25 @@ export const walkField = ({
   config,
   recurseSlots = false,
 }: WalkFieldOpts): any => {
-  const fieldType = (fields as any)[propKey]?.type
-  const map = mappers[fieldType]
+  const fieldType = (fields as any)[propKey as keyof typeof fields]?.type
+  const map = mappers[fieldType as keyof Mappers]
 
   if (map && fieldType === 'slot') {
     const content = (value as Content) || []
     const mappedContent = recurseSlots
       ? content.map((el: any) => {
-          const componentConfig = config.components[el.type]
-          if (!componentConfig) throw new Error(`Could not find component config for ${el.type}`)
-          const slotFields = componentConfig.fields ?? {}
-          return walkField({
-            value: { ...el, props: defaultSlots(el.props, slotFields) },
-            fields: slotFields,
-            mappers,
-            id: el.props.id,
-            config,
-            recurseSlots,
-          })
+        const componentConfig = config.components[el.type]
+        if (!componentConfig) throw new Error(`Could not find component config for ${el.type}`)
+        const slotFields = componentConfig.fields ?? {}
+        return walkField({
+          value: { ...el, props: defaultSlots(el.props, slotFields) },
+          fields: slotFields,
+          mappers,
+          id: el.props.id,
+          config,
+          recurseSlots,
         })
+      })
       : content
 
     if (containsPromise(mappedContent)) return Promise.all(mappedContent)

@@ -32,7 +32,7 @@ export function walkTree<
     )
   }
 
-  if ('props' in data && data.props) {
+  if (typeof data === 'object' && data !== null && 'props' in data && (data as any).props) {
     return walkItem(data) as T
   }
 

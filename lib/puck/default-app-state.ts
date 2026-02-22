@@ -13,8 +13,8 @@ export const defaultAppState: PrivateAppState = {
     previewMode: 'edit',
     viewports: {
       current: {
-        width: defaultViewports[0].width,
-        height: defaultViewports[0].height || 'auto',
+        width: defaultViewports[0]?.width || 375,
+        height: defaultViewports[0]?.height || 'auto',
       },
       options: [],
       controlsVisible: true,

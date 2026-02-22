@@ -289,13 +289,13 @@ function registerLayoutZones() {
   if (layoutType.value === 'multi-zone') {
     for (let i = 0; i < columnCount.value; i++) {
       const zoneCompound = getColumnZoneCompound(i)
-      if (!store.state.data?.zones?.[zoneCompound]) {
+      if (!store.state.indexes?.zones?.[zoneCompound]) {
         store.dispatch({ type: 'registerZone', zone: zoneCompound })
       }
     }
   } else if (layoutType.value === 'single-zone') {
     const zoneCompound = getFlexZoneCompound()
-    if (!store.state.data?.zones?.[zoneCompound]) {
+    if (!store.state.indexes?.zones?.[zoneCompound]) {
       store.dispatch({ type: 'registerZone', zone: zoneCompound })
     }
   }

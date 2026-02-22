@@ -134,7 +134,7 @@ export function walkAppState<UserData extends Data = Data>(
     const [, zoneContent] = processContent(
       [rootDroppableId],
       zoneCompound,
-      zones[zoneCompound],
+      zones[zoneCompound] || [],
       'dropzone',
       parentId
     )
@@ -152,7 +152,7 @@ export function walkAppState<UserData extends Data = Data>(
 
   const root: RootDataWithProps = {
     ...state.data.root,
-    props: processedRoot.props,
+    props: processedRoot.props as any,
   }
 
   return {

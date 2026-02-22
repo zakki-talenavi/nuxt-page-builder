@@ -1,7 +1,6 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 import Aura from '@primeuix/themes/aura'
-import { fileURLToPath } from 'node:url'
-import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
 
 const __rootDir = dirname(fileURLToPath(import.meta.url))
 
