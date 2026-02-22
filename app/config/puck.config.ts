@@ -200,18 +200,26 @@ const GridBlock = defineComponent({
   props: {
     numColumns: { type: Number, default: 4 },
     gap: { type: Number, default: 24 },
+    layout: {
+      type: Object as () => { verticalPadding?: string },
+      default: () => ({ verticalPadding: '0px' }),
+    },
   },
   setup(props, { slots }) {
-    return () =>
-      h('div', {
+    return () => {
+      const cols = Math.min(12, Math.max(1, Number(props.numColumns) || 4))
+      const verticalPadding = props.layout?.verticalPadding ?? '0px'
+      return h('div', {
         style: {
           display: 'grid',
-          gridTemplateColumns: `repeat(${props.numColumns}, 1fr)`,
+          gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gap: `${props.gap}px`,
-          padding: '8px 0',
+          paddingTop: verticalPadding,
+          paddingBottom: verticalPadding,
           minHeight: '60px',
         },
       }, slots.default?.() || [])
+    }
   },
 })
 
@@ -591,10 +599,25 @@ export const puckConfig = {
     },
     Grid: {
       label: 'Grid',
-      defaultProps: { numColumns: 4, gap: 24 },
+      defaultProps: {
+        numColumns: 4,
+        gap: 24,
+        layout: { verticalPadding: '0px' },
+      },
       fields: {
-        numColumns: { type: 'number', label: 'Columns', min: 1, max: 12 },
-        gap: { type: 'number', label: 'Gap (px)', min: 0 },
+        numColumns: { type: 'number', label: 'Number of columns', min: 1, max: 12 },
+        gap: { type: 'number', label: 'Gap', min: 0 },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            verticalPadding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
+            },
+          },
+        },
       },
       render: markRaw(GridBlock),
     },

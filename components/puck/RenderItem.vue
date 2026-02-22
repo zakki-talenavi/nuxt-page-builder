@@ -63,7 +63,7 @@ const layoutType = computed<'multi-zone' | 'single-zone' | 'none'>(() => {
 const columnCount = computed(() => {
   const p = props.item.props || {}
   if (props.item.type === 'Columns') return parseInt(String(p.columns)) || 2
-  if (props.item.type === 'Grid') return p.numColumns || 4
+  if (props.item.type === 'Grid') return Math.min(12, Math.max(1, Number(p.numColumns) || 4))
   return 1
 })
 

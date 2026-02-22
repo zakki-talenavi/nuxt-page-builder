@@ -39,6 +39,8 @@
       v-else-if="fieldType === 'number'"
       class="puck-field__input"
       type="number"
+      :min="fieldConfig?.min"
+      :max="fieldConfig?.max"
       :value="value ?? ''"
       @input="onChange"
     />
@@ -104,7 +106,17 @@ const options = computed(() => {
 function onChange(e: Event) {
   const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
   let val: any = target.value
-  if (fieldType.value === 'number') val = parseFloat(val) || 0
+  if (fieldType.value === 'number') {
+    const num = parseFloat(val)
+    const cfg = props.fieldConfig
+    const min = cfg?.min != null ? Number(cfg.min) : null
+    const max = cfg?.max != null ? Number(cfg.max) : null
+    if (Number.isFinite(num)) {
+      val = min != null && num < min ? min : max != null && num > max ? max : num
+    } else {
+      val = 0
+    }
+  }
   emit('change', val)
 }
 </script>
