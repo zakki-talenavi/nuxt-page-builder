@@ -195,6 +195,19 @@ const ImageBlock = defineComponent({
 
 // ── Grid ──
 
+const gridAlignOptions = [
+  { label: 'Start', value: 'start' },
+  { label: 'Center', value: 'center' },
+  { label: 'End', value: 'end' },
+  { label: 'Stretch', value: 'stretch' },
+]
+const gridContentOptions = [
+  ...gridAlignOptions,
+  { label: 'Space between', value: 'space-between' },
+  { label: 'Space around', value: 'space-around' },
+  { label: 'Space evenly', value: 'space-evenly' },
+]
+
 const GridBlock = defineComponent({
   name: 'GridBlock',
   props: {
@@ -204,6 +217,9 @@ const GridBlock = defineComponent({
       type: Object as () => { verticalPadding?: string },
       default: () => ({ verticalPadding: '0px' }),
     },
+    alignItems: { type: String, default: 'stretch' },
+    justifyContent: { type: String, default: 'start' },
+    alignContent: { type: String, default: 'start' },
   },
   setup(props, { slots }) {
     return () => {
@@ -214,6 +230,9 @@ const GridBlock = defineComponent({
           display: 'grid',
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gap: `${props.gap}px`,
+          alignItems: props.alignItems || 'stretch',
+          justifyContent: props.justifyContent || 'start',
+          alignContent: props.alignContent || 'start',
           paddingTop: verticalPadding,
           paddingBottom: verticalPadding,
           minHeight: '60px',
@@ -603,10 +622,28 @@ export const puckConfig = {
         numColumns: 4,
         gap: 24,
         layout: { verticalPadding: '0px' },
+        alignItems: 'stretch',
+        justifyContent: 'start',
+        alignContent: 'start',
       },
       fields: {
         numColumns: { type: 'number', label: 'Number of columns', min: 1, max: 12 },
         gap: { type: 'number', label: 'Gap', min: 0 },
+        alignItems: {
+          type: 'select',
+          label: 'Align items',
+          options: gridAlignOptions,
+        },
+        justifyContent: {
+          type: 'select',
+          label: 'Justify content',
+          options: gridContentOptions,
+        },
+        alignContent: {
+          type: 'select',
+          label: 'Align content',
+          options: gridContentOptions,
+        },
         layout: {
           type: 'object',
           label: 'Layout',
