@@ -48,6 +48,12 @@ export type PuckNodeInstance = {
 
 const defaultPageFields = { title: { type: 'text' as const } }
 
+/** Max undo/redo steps to avoid unbounded memory growth */
+const MAX_HISTORY = 50
+
+/** Max cached permission entries to avoid unbounded cache growth */
+const MAX_PERMISSIONS_CACHE = 200
+
 function debounce<T extends (...args: any[]) => void>(fn: T, ms = 250) {
   let timer: ReturnType<typeof setTimeout>
   return ((...args: Parameters<T>) => {
@@ -148,6 +154,10 @@ export const usePuckStore = defineStore('puck', {
       onAction?: (action: PuckAction, newState: AppState, prevState: AppState) => void
     }) {
       this.config = initial.config
+      Object.values(this.pendingLoadTimeouts).forEach((t) => clearTimeout(t))
+      this.pendingLoadTimeouts = {}
+      this.permissionsCache = {}
+      this.resolvedPermissions = {}
       if (initial.plugins) this.plugins = initial.plugins
       this.overrides = useLoadedOverrides(initial.plugins ?? [], initial.overrides ?? {})
       if (initial.iframe) this.iframe = initial.iframe
@@ -208,7 +218,9 @@ export const usePuckStore = defineStore('puck', {
       if (!(self as any)._recordHistoryDebounced) {
         (self as any)._recordHistoryDebounced = debounce((appState: any) => {
           const history = { state: makeStatePublic(appState), id: generateId('history') }
-          self.histories = [...self.histories.slice(0, self.historyIndex + 1), history]
+          let next = [...self.histories.slice(0, self.historyIndex + 1), history]
+          if (next.length > MAX_HISTORY) next = next.slice(next.length - MAX_HISTORY)
+          self.histories = next
           self.historyIndex = self.histories.length - 1
         }, 250)
       }
@@ -434,6 +446,13 @@ export const usePuckStore = defineStore('puck', {
       this.permissionsCache = {
         ...this.permissionsCache,
         [item.props.id]: { lastParentId: parentId, lastData: item, lastPermissions: resolved },
+      }
+      const cacheKeys = Object.keys(this.permissionsCache)
+      if (cacheKeys.length > MAX_PERMISSIONS_CACHE) {
+        const toEvict = cacheKeys.slice(0, cacheKeys.length - MAX_PERMISSIONS_CACHE)
+        const next: Record<string, any> = {}
+        for (const k of cacheKeys) if (!toEvict.includes(k)) next[k] = this.permissionsCache[k]
+        this.permissionsCache = next
       }
       this.resolvedPermissions = {
         ...this.resolvedPermissions,

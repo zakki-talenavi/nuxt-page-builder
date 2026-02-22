@@ -389,11 +389,17 @@ watch(isSelected, (selected) => {
   }
 }, { immediate: true })
 
+let scrollResizeRaf: number | null = null
 function onScrollOrResize() {
-  if (itemRef.value && isSelected.value) updateActionsPortalPosition()
+  if (scrollResizeRaf != null) return
+  scrollResizeRaf = requestAnimationFrame(() => {
+    scrollResizeRaf = null
+    if (itemRef.value && isSelected.value) updateActionsPortalPosition()
+  })
 }
 
 onBeforeUnmount(() => {
+  if (scrollResizeRaf != null) cancelAnimationFrame(scrollResizeRaf)
   document.removeEventListener('scroll', onScrollOrResize, true)
   window.removeEventListener('resize', onScrollOrResize)
 })

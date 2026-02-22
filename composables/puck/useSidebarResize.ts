@@ -14,14 +14,24 @@ export function useSidebarResize(
     startX = e.clientX
     startWidth = width.value
 
+    let rafId: number | null = null
+    let lastEv: MouseEvent | null = null
     const onMouseMove = (ev: MouseEvent) => {
-      const delta = side === 'left'
-        ? ev.clientX - startX
-        : startX - ev.clientX
-      width.value = Math.max(minWidth, Math.min(maxWidth, startWidth + delta))
+      lastEv = ev
+      if (rafId != null) return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+        const e = lastEv
+        lastEv = null
+        if (!e) return
+        const delta = side === 'left' ? e.clientX - startX : startX - e.clientX
+        width.value = Math.max(minWidth, Math.min(maxWidth, startWidth + delta))
+      })
     }
 
     const onMouseUp = () => {
+      if (rafId != null) cancelAnimationFrame(rafId)
+      lastEv = null
       isResizing.value = false
       document.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('mouseup', onMouseUp)

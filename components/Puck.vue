@@ -203,12 +203,21 @@ const jsonData = computed(() =>
     : { root: null, content: [], zones: {} }
 )
 
-const formattedJson = computed(() =>
+/** Max JSON string length in panel to avoid UI freeze and huge DOM (copy still gets full) */
+const JSON_PANEL_MAX_DISPLAY = 80_000
+
+const jsonString = computed(() =>
   showJsonPanel.value ? JSON.stringify(jsonData.value, null, 2) : ''
 )
 
+const formattedJson = computed(() => {
+  const raw = jsonString.value
+  if (!raw || raw.length <= JSON_PANEL_MAX_DISPLAY) return raw
+  return raw.slice(0, JSON_PANEL_MAX_DISPLAY) + '\n\n... (truncated for display — use Copy for full JSON)'
+})
+
 function copyJson() {
-  navigator.clipboard.writeText(formattedJson.value).then(() => {
+  navigator.clipboard.writeText(jsonString.value).then(() => {
     copyLabel.value = 'Copied!'
     setTimeout(() => { copyLabel.value = 'Copy' }, 2000)
   })
