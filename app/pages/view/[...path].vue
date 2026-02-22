@@ -1,5 +1,5 @@
 <template>
-  <ClientOnly>
+  <ClientOnly :key="path">
     <div v-if="resolvedData" class="puck-view">
       <div v-if="!resolvedData.content?.length" class="puck-view__empty">
         <p>No content yet. <NuxtLink :to="editLink">Open the editor</NuxtLink> to start building.</p>

@@ -7,6 +7,7 @@
         :config="puckConfig"
         :data="demo.data.value"
         header-path="/"
+        :storage-key="demo.key"
         :iframe="{ enabled: false }"
         @publish="onPublish"
       >

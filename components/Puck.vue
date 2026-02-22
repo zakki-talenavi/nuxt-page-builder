@@ -66,7 +66,7 @@
         <!-- JSON Schema Viewer -->
         <div v-if="showJsonPanel" class="puck-json-panel">
           <div class="puck-json-panel__header">
-            <span class="puck-json-panel__title">JSON Schema — puck-data-index</span>
+            <span class="puck-json-panel__title">JSON Schema — {{ props.storageKey ?? 'puck-data-index' }}</span>
             <div class="puck-json-panel__actions">
               <button class="puck-json-panel__btn" @click="copyJson" :title="copyLabel">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -114,6 +114,8 @@ const props = defineProps<{
   headerPath?: string
   iframe?: { enabled?: boolean }
   plugins?: any[]
+  /** Storage key for JSON panel label (e.g. from useDemoData.key) */
+  storageKey?: string
 }>()
 
 const emit = defineEmits<{ (e: 'publish', data: any): void }>()

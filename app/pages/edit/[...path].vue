@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="path">
     <pre v-if="clientError" style="color:#ef4444;padding:1rem;white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;margin:1rem;">{{ clientError }}</pre>
     <ClientOnly>
       <Puck
@@ -7,6 +7,7 @@
         :config="puckConfig"
         :data="demo.data.value"
         :header-path="path"
+        :storage-key="demo.key"
         :iframe="{ enabled: false }"
         @publish="onPublish"
       >
