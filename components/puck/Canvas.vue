@@ -65,12 +65,12 @@
             :selected-id="selectedId"
             :hovered-id="hoveredId"
             :zone="rootZone"
-            @select="$emit('select', $event)"
-            @hover="$emit('hover', $event)"
-            @deselect="$emit('deselect')"
-            @duplicate="$emit('duplicate', $event)"
-            @remove="$emit('remove', $event)"
-            @slot-drop="$emit('slot-drop', $event)"
+            @select="emit('select', $event)"
+            @hover="emit('hover', $event)"
+            @deselect="emit('deselect')"
+            @duplicate="emit('duplicate', $event)"
+            @remove="emit('remove', $event)"
+            @slot-drop="emit('slot-drop', $event)"
           />
 
           <div v-if="!items.length" class="puck-canvas__empty">
@@ -292,10 +292,31 @@ onBeforeUnmount(() => {
   ro?.disconnect()
 })
 
+function getDropIndex(e: DragEvent): number {
+  const target = e.currentTarget as HTMLElement
+  if (!target || !props.items) return props.items?.length || 0
+  
+  const itemEls = Array.from(target.querySelectorAll('.puck-canvas-item'))
+  for (let i = 0; i < itemEls.length; i++) {
+    const rect = itemEls[i].getBoundingClientRect()
+    if (e.clientY < rect.top + rect.height / 2) return i
+  }
+  return props.items.length
+}
+
 function handleDrop(e: DragEvent) {
   if (store.getPermissions()?.insert === false) return
+  const moveId = e.dataTransfer?.getData('application/puck-move') || (typeof window !== 'undefined' ? (window as any).__puckDragId : '')
   const type = e.dataTransfer?.getData('application/puck-component') || e.dataTransfer?.getData('text/plain')
-  if (type) emit('drop', type)
+  const index = getDropIndex(e)
+  
+  if (moveId) {
+    emit('slot-drop', { moveId, zone: rootZone, index })
+  } else if (type) {
+    // Canvas root drop doesn't have slot-drop index currently, but we can pass it if we adapt Puck.vue
+    // Puck.vue's `<PuckCanvas @drop="onDrop" />` doesn't take index. Let's fire slot-drop instead for root!
+    emit('slot-drop', { componentType: type, zone: rootZone, index })
+  }
 }
 </script>
 

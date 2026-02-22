@@ -44,9 +44,14 @@ export const moveAction = <UserData extends Data>(
         zoneCompound === action.sourceZone &&
         zoneCompound === action.destinationZone
       ) {
+        const adjustedDestIndex =
+          action.destinationIndex > action.sourceIndex
+            ? action.destinationIndex - 1
+            : action.destinationIndex
+
         return insert(
           remove(content, action.sourceIndex),
-          action.destinationIndex,
+          adjustedDestIndex,
           item
         )
       }

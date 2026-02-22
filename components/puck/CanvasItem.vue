@@ -6,7 +6,11 @@
       'is-selected': isSelected,
       'is-hovered': isHovered && !isSelected,
       'is-layout': isLayoutComponent,
+      'is-dragging': isDragging,
     }"
+    :draggable="canDrag"
+    @dragstart.stop="onDragStart"
+    @dragend.stop="onDragEnd"
     @click.stop="emit('select', item.props?.id)"
     @mouseenter="emit('hover', item.props?.id)"
     @mouseleave="emit('hover', null)"
@@ -170,6 +174,30 @@ const renderer = computed(() => props.config?.components?.[props.item.type]?.ren
 const canDuplicate = computed(() => store.getPermissions({ item: props.item })?.duplicate !== false)
 const canDeleteItem = computed(() => store.getPermissions({ item: props.item })?.delete !== false)
 
+const isDragging = ref(false)
+
+const canDrag = computed(() => store.getPermissions({ item: props.item })?.drag !== false)
+
+function onDragStart(e: DragEvent) {
+  if (!canDrag.value) {
+    e.preventDefault()
+    return
+  }
+  
+  setTimeout(() => {
+    isDragging.value = true
+  }, 0)
+  
+  e.dataTransfer?.setData('application/puck-move', itemId.value)
+  e.dataTransfer!.effectAllowed = 'copyMove'
+  if (typeof window !== 'undefined') (window as any).__puckDragId = itemId.value
+}
+
+function onDragEnd() {
+  isDragging.value = false
+  if (typeof window !== 'undefined') (window as any).__puckDragId = null
+}
+
 const isLayoutComponent = computed(() => layoutType.value !== 'none')
 
 const layoutType = computed<'multi-zone' | 'single-zone' | 'none'>(() => {
@@ -304,7 +332,9 @@ function registerLayoutZones() {
 const zoneDragOver = ref<Record<string, boolean>>({})
 
 function onZoneDragOver(e: DragEvent, zoneKey: string) {
-  e.dataTransfer!.dropEffect = 'copy'
+  const isMove = e.dataTransfer?.types.includes('application/puck-move') || (typeof window !== 'undefined' && !!(window as any).__puckDragId)
+  e.dataTransfer!.dropEffect = isMove ? 'move' : 'copy'
+  
   if (zoneDragOver.value[zoneKey]) return
   zoneDragOver.value = { ...zoneDragOver.value, [zoneKey]: true }
 }
@@ -314,14 +344,32 @@ function onZoneDragLeave(zoneKey: string) {
   zoneDragOver.value = { ...zoneDragOver.value, [zoneKey]: false }
 }
 
+function getDropIndex(e: DragEvent, zoneKey: string): number {
+  const target = e.currentTarget as HTMLElement
+  if (!target) return getZoneContent(zoneKey).length
+  
+  // Only look at immediate children to avoid querying items in nested structures
+  const items = Array.from(target.children).filter(el => el.classList.contains('puck-canvas-item'))
+  const isVertical = layoutType.value === 'multi-zone' // columns stack items vertically
+  
+  for (let i = 0; i < items.length; i++) {
+    const rect = items[i].getBoundingClientRect()
+    if (isVertical) {
+      if (e.clientY < rect.top + rect.height / 2) return i
+    } else {
+      if (e.clientX < rect.left + rect.width / 2) return i
+    }
+  }
+  return getZoneContent(zoneKey).length
+}
+
 function onZoneDrop(e: DragEvent, zoneKey: string) {
   zoneDragOver.value = { ...zoneDragOver.value, [zoneKey]: false }
 
-  const moveId = e.dataTransfer?.getData('application/puck-move')
+  const moveId = e.dataTransfer?.getData('application/puck-move') || (typeof window !== 'undefined' ? (window as any).__puckDragId : '')
   const componentType = e.dataTransfer?.getData('application/puck-component') || e.dataTransfer?.getData('text/plain')
   const zoneCompound = `${itemId.value}:${zoneKey}`
-  const content = getZoneContent(zoneKey)
-  const index = content.length
+  const index = getDropIndex(e, zoneKey)
 
   if (moveId) {
     emit('slot-drop', { moveId, zone: zoneCompound, index })
@@ -373,6 +421,11 @@ onBeforeUnmount(() => {
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   z-index: 3;
+}
+.puck-canvas-item.is-dragging {
+  opacity: 0.5;
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* Toolbar (top: -36px) jangan tertutup item di bawah: item yang persis di atas item terpilih naik z-index */

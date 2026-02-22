@@ -49,17 +49,32 @@ function onDragLeave() {
   isDragOver.value = false
 }
 
+function getDropIndex(e: DragEvent): number {
+  const target = e.currentTarget as HTMLElement
+  if (!target || !props.items) return props.items?.length || 0
+  
+  // Assume DropZone children are items we can measure
+  const children = Array.from(target.children).filter(c => !c.classList.contains('puck-dropzone__placeholder'))
+  for (let i = 0; i < children.length; i++) {
+    const rect = children[i].getBoundingClientRect()
+    // Simple vertical heuristic
+    if (e.clientY < rect.top + rect.height / 2) return i
+  }
+  return props.items.length
+}
+
 function onDrop(e: DragEvent) {
   isDragOver.value = false
   if (!props.allowInsert) return
 
   const moveId = e.dataTransfer?.getData('application/puck-move')
   const componentType = e.dataTransfer?.getData('application/puck-component') || e.dataTransfer?.getData('text/plain')
+  const index = getDropIndex(e)
 
   if (moveId) {
-    emit('drop', { moveId, zone: props.zone, index: props.items.length })
+    emit('drop', { moveId, zone: props.zone, index })
   } else if (componentType) {
-    emit('drop', { componentType, zone: props.zone, index: props.items.length })
+    emit('drop', { componentType, zone: props.zone, index })
   }
 }
 </script>

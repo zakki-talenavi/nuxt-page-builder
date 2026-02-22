@@ -76,7 +76,33 @@ export function walkAppState<UserData extends Data = Data>(
     index: number
   ): ComponentData => {
     const mappedItem = mapNodeOrSkip(item, path, index)
-    if (!mappedItem) return item
+    if (!mappedItem) {
+      // If we skip mapping this item, we MUST still copy its existing related zones
+      // to newZones, otherwise they are lost in the new state.
+      const id = item.props.id
+      forRelatedZones(item, state.data, (relatedPath, relatedZoneCompound, relatedContent) => {
+        const [, zone] = relatedZoneCompound.split(':')
+        const newZoneCompound = `${id}:${zone}`
+        if (!newZones[newZoneCompound]) {
+          newZones[newZoneCompound] = relatedContent.map(child => processItem(child, [...path, newZoneCompound], index))
+          newZoneIndex[newZoneCompound] = {
+            contentIds: newZones[newZoneCompound].map((item: any) => item.props.id),
+            type: 'dropzone',
+          }
+        }
+      }, path)
+
+      const thisZoneCompound = path[path.length - 1]
+      const [parentId, zone] = thisZoneCompound ? thisZoneCompound.split(':') : [null, '']
+      newNodeIndex[id] = {
+        data: item,
+        flatData: flattenNode(item, config) as ComponentData,
+        path,
+        parentId,
+        zone,
+      }
+      return item
+    }
 
     const id = mappedItem.props.id
     const newProps = {
