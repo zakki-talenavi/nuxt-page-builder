@@ -1,13 +1,20 @@
 <template>
-  <div
-    class="puck-datatable-block"
-    :style="tableColorVars"
-  >
-    <div v-if="apiError" class="puck-datatable-block__error">
-      {{ apiError }}
-    </div>
-    <template v-else>
-      <DataTable
+  <div class="puck-dt-card">
+    <div
+      class="puck-datatable-block"
+      :style="tableColorVars"
+    >
+      <header v-if="cardTitle" class="puck-dt-card__header">
+        <h3 class="puck-dt-card__title">{{ cardTitle }}</h3>
+        <p v-if="cardSubtitle" class="puck-dt-card__subtitle">{{ cardSubtitle }}</p>
+      </header>
+
+      <div v-if="apiError" class="puck-datatable-block__error">
+        {{ apiError }}
+      </div>
+      <template v-else>
+        <div class="puck-dt-card__body">
+          <DataTable
         :value="displayedData"
         data-key="_id"
         :show-gridlines="showGridlines"
@@ -70,10 +77,11 @@
           {{ formatCell(data, col.field) }}
         </template>
       </Column>
-      </DataTable>
+          </DataTable>
+        </div>
 
-      <!-- Paginator kustom: selalu terlihat, client & server -->
-      <div v-if="paginator" class="puck-dt-paginator">
+        <!-- Paginator kustom: selalu terlihat, client & server -->
+        <div v-if="paginator" class="puck-dt-paginator">
         <span class="puck-dt-paginator__report">
           {{ paginatorReport }}
         </span>
@@ -131,8 +139,9 @@
             </option>
           </select>
         </div>
-      </div>
-    </template>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -175,6 +184,8 @@ const props = withDefaults(
     bodyTextColor?: string
     borderColor?: string
     rowHoverColor?: string
+    cardTitle?: string
+    cardSubtitle?: string
   }>(),
   {
     columns: () => [],
@@ -204,6 +215,8 @@ const props = withDefaults(
     bodyTextColor: '',
     borderColor: '',
     rowHoverColor: '',
+    cardTitle: '',
+    cardSubtitle: '',
   }
 )
 
@@ -480,6 +493,41 @@ function onDeleteRow(data: Record<string, unknown>) {
 </script>
 
 <style scoped>
+/* Card wrapper: rapi, border, shadow */
+.puck-dt-card {
+  width: 100%;
+  border: 1px solid var(--puck-dt-border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+  background: var(--puck-dt-body-bg, #fff);
+  overflow: hidden;
+}
+
+.puck-dt-card__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--puck-dt-border, #e5e7eb);
+  background: var(--puck-dt-body-bg, #fff);
+}
+
+.puck-dt-card__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--puck-dt-body-text, #1f2937);
+  line-height: 1.3;
+}
+
+.puck-dt-card__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  color: var(--puck-color-text-muted, #6b7280);
+  line-height: 1.4;
+}
+
+.puck-dt-card__body {
+  overflow: auto;
+}
+
 .puck-datatable-block {
   --puck-dt-header-bg: #4f46e5;
   --puck-dt-header-text: #fff;
@@ -493,8 +541,6 @@ function onDeleteRow(data: Record<string, unknown>) {
   padding: 0;
   color: var(--puck-dt-body-text);
   background: var(--puck-dt-body-bg);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
@@ -539,6 +585,8 @@ function onDeleteRow(data: Record<string, unknown>) {
   padding: 12px 16px;
   font-size: 0.875rem;
   vertical-align: middle;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 :deep(.p-datatable-tbody > tr:last-child > td) {
@@ -564,9 +612,9 @@ function onDeleteRow(data: Record<string, unknown>) {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 12px 16px;
+  padding: 12px 20px;
   border-top: 1px solid var(--puck-dt-border);
-  background: #fff;
+  background: var(--puck-dt-body-bg, #fff);
   font-size: 0.8125rem;
   color: var(--puck-color-text, #374151);
 }

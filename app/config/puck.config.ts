@@ -1108,6 +1108,8 @@ export const puckConfig = {
         bodyTextColor: '',
         borderColor: '',
         rowHoverColor: '',
+        cardTitle: '',
+        cardSubtitle: '',
       },
       fields: {
         apiUrl: { type: 'text', label: 'API URL (optional)', description: 'Leave empty for manual data. Example: https://api.example.com/users' },
@@ -1191,6 +1193,8 @@ export const puckConfig = {
         bodyTextColor: { type: 'color', label: 'Warna teks body' },
         borderColor: { type: 'color', label: 'Warna border' },
         rowHoverColor: { type: 'color', label: 'Warna hover baris' },
+        cardTitle: { type: 'text', label: 'Judul card (opsional)' },
+        cardSubtitle: { type: 'text', label: 'Subjudul card (opsional)' },
         showActionColumn: {
           type: 'radio',
           label: 'Kolom Aksi',
