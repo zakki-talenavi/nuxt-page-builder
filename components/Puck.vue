@@ -44,6 +44,7 @@
           @update:active-tab="activeLeftTab = $event"
           @select="selectById"
           @drag-start="onDragStart"
+          @outline-drop="onOutlineDrop"
         />
 
         <PuckCanvas
@@ -322,6 +323,22 @@ function removeById(id: string) {
     type: 'remove',
     index: loc.index,
     zone: loc.zone,
+  })
+}
+
+function onOutlineDrop(payload: { draggedId: string; targetId: string; position: 'before' | 'after' }) {
+  const { draggedId, targetId, position } = payload
+  if (draggedId === targetId) return
+  const locSrc = findNodeLocation(draggedId)
+  const locTgt = findNodeLocation(targetId)
+  if (!locSrc || !locTgt) return
+  const destinationIndex = position === 'before' ? locTgt.index : locTgt.index + 1
+  store.dispatch({
+    type: 'move',
+    sourceZone: locSrc.zone,
+    sourceIndex: locSrc.index,
+    destinationZone: locTgt.zone,
+    destinationIndex,
   })
 }
 

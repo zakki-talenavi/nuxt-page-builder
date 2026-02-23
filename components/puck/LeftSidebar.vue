@@ -67,6 +67,7 @@
         :config="store.config"
         @select="(id) => $emit('select', id)"
         @hover="() => {}"
+        @outline-drop="$emit('outlineDrop', $event)"
       />
     </div>
   </aside>
@@ -87,6 +88,7 @@ defineEmits<{
   (e: 'update:activeTab', tab: string): void
   (e: 'select', id: string): void
   (e: 'dragStart', event: DragEvent, type: string): void
+  (e: 'outlineDrop', payload: { draggedId: string; targetId: string; position: 'before' | 'after' }): void
 }>()
 
 const store = usePuckStore()
