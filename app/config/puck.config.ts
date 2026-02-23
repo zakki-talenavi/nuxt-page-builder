@@ -266,6 +266,7 @@ const GridBlock = defineComponent({
       type: Object as () => { verticalPadding?: string },
       default: () => ({ verticalPadding: '0px' }),
     },
+    justifyItems: { type: String, default: 'stretch' },
     alignItems: { type: String, default: 'stretch' },
     justifyContent: { type: String, default: 'start' },
     alignContent: { type: String, default: 'start' },
@@ -279,6 +280,7 @@ const GridBlock = defineComponent({
           display: 'grid',
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gap: `${props.gap}px`,
+          justifyItems: props.justifyItems || 'stretch',
           alignItems: props.alignItems || 'stretch',
           justifyContent: props.justifyContent || 'start',
           alignContent: props.alignContent || 'start',
@@ -315,11 +317,34 @@ const ColumnsBlock = defineComponent({
 
 // ── Flex ──
 
+const flexJustifyOptions = [
+  { label: 'Flex start', value: 'flex-start' },
+  { label: 'Center', value: 'center' },
+  { label: 'Flex end', value: 'flex-end' },
+  { label: 'Space between', value: 'space-between' },
+  { label: 'Space around', value: 'space-around' },
+  { label: 'Space evenly', value: 'space-evenly' },
+]
+const flexAlignOptions = [
+  { label: 'Stretch', value: 'stretch' },
+  { label: 'Center', value: 'center' },
+  { label: 'Flex start', value: 'flex-start' },
+  { label: 'Flex end', value: 'flex-end' },
+]
+const flexAlignContentOptions = [
+  ...flexAlignOptions,
+  { label: 'Space between', value: 'space-between' },
+  { label: 'Space around', value: 'space-around' },
+  { label: 'Space evenly', value: 'space-evenly' },
+]
+
 const FlexBlock = defineComponent({
   name: 'FlexBlock',
   props: {
     direction: { type: String, default: 'row' },
-    justifyContent: { type: String, default: 'start' },
+    justifyContent: { type: String, default: 'flex-start' },
+    alignItems: { type: String, default: 'stretch' },
+    alignContent: { type: String, default: 'stretch' },
     gap: { type: Number, default: 24 },
     wrap: { type: String, default: 'wrap' },
     layout: {
@@ -330,12 +355,13 @@ const FlexBlock = defineComponent({
   setup(props, { slots }) {
     return () => {
       const verticalPadding = props.layout?.verticalPadding ?? '0px'
-      const jc = props.justifyContent === 'start' ? 'flex-start' : props.justifyContent === 'end' ? 'flex-end' : props.justifyContent
       return h('div', {
         style: {
           display: 'flex',
           flexDirection: props.direction,
-          justifyContent: jc,
+          justifyContent: props.justifyContent === 'start' ? 'flex-start' : props.justifyContent === 'end' ? 'flex-end' : (props.justifyContent || 'flex-start'),
+          alignItems: props.alignItems || 'stretch',
+          alignContent: props.alignContent || 'stretch',
           gap: `${props.gap}px`,
           flexWrap: props.wrap,
           paddingTop: verticalPadding,
@@ -851,6 +877,7 @@ export const puckConfig = {
         numColumns: 4,
         gap: 24,
         layout: { verticalPadding: '0px' },
+        justifyItems: 'stretch',
         alignItems: 'stretch',
         justifyContent: 'start',
         alignContent: 'start',
@@ -858,6 +885,11 @@ export const puckConfig = {
       fields: {
         numColumns: { type: 'number', label: 'Number of columns', min: 1, max: 12 },
         gap: { type: 'number', label: 'Gap', min: 0 },
+        justifyItems: {
+          type: 'select',
+          label: 'Justify items',
+          options: gridAlignOptions,
+        },
         alignItems: {
           type: 'select',
           label: 'Align items',
@@ -891,7 +923,9 @@ export const puckConfig = {
       label: 'Flex',
       defaultProps: {
         direction: 'row',
-        justifyContent: 'start',
+        justifyContent: 'flex-start',
+        alignItems: 'stretch',
+        alignContent: 'stretch',
         gap: 24,
         wrap: 'wrap',
         layout: { verticalPadding: '0px' },
@@ -903,9 +937,19 @@ export const puckConfig = {
           options: [{ label: 'Row', value: 'row' }, { label: 'Column', value: 'column' }],
         },
         justifyContent: {
-          type: 'radio',
-          label: 'Justify Content',
-          options: [{ label: 'Start', value: 'start' }, { label: 'Center', value: 'center' }, { label: 'End', value: 'end' }],
+          type: 'select',
+          label: 'Justify content',
+          options: flexJustifyOptions,
+        },
+        alignItems: {
+          type: 'select',
+          label: 'Align items',
+          options: flexAlignOptions,
+        },
+        alignContent: {
+          type: 'select',
+          label: 'Align content (wrap only)',
+          options: flexAlignContentOptions,
         },
         gap: { type: 'number', label: 'Gap', min: 0 },
         wrap: {

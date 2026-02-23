@@ -100,7 +100,13 @@ const label = computed(() => props.fieldConfig?.label || props.fieldKey)
 const fieldType = computed(() => props.fieldConfig?.type || 'text')
 const options = computed(() => {
   const opts = props.fieldConfig?.options || []
-  return opts.map((o: any) => typeof o === 'string' ? { label: o, value: o } : o)
+  const mapped = opts.map((o: any) => typeof o === 'string' ? { label: o, value: o } : o)
+  const allowClear = props.fieldConfig?.allowClear !== false
+  const hasEmpty = mapped.some((o: any) => o.value === '' || o.value == null)
+  if (allowClear && mapped.length > 0 && !hasEmpty) {
+    return [{ label: '— Kosongkan', value: '' }, ...mapped]
+  }
+  return mapped
 })
 
 function onChange(e: Event) {

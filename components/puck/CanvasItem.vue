@@ -248,6 +248,7 @@ const containerStyle = computed(() => {
       display: 'grid',
       gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
       gap: `${p.gap || 24}px`,
+      justifyItems: p.justifyItems || 'stretch',
       alignItems: p.alignItems || 'stretch',
       justifyContent: p.justifyContent || 'start',
       alignContent: p.alignContent || 'start',
@@ -270,12 +271,14 @@ const containerStyle = computed(() => {
     }
   }
   if (type === 'Flex') {
-    const jc = p.justifyContent === 'start' ? 'flex-start' : p.justifyContent === 'end' ? 'flex-end' : p.justifyContent
+    const jc = p.justifyContent === 'start' ? 'flex-start' : p.justifyContent === 'end' ? 'flex-end' : (p.justifyContent || 'flex-start')
     const verticalPadding = p.layout?.verticalPadding ?? '0px'
     return {
       display: 'flex',
       flexDirection: p.direction || 'row',
-      justifyContent: jc || 'flex-start',
+      justifyContent: jc,
+      alignItems: p.alignItems || 'stretch',
+      alignContent: p.alignContent || 'stretch',
       gap: `${p.gap || 24}px`,
       flexWrap: p.wrap || 'wrap',
       paddingTop: verticalPadding,
