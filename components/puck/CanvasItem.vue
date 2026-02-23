@@ -360,15 +360,14 @@ function transformPropsForCanvas(
   return out
 }
 
-/** Props with contentEditable fields replaced by InlineTextEdit VNodes for in-canvas editing */
+/** Props with contentEditable fields replaced by InlineTextEdit VNodes for in-canvas editing. Always includes componentId so blocks can dispatch replace (e.g. DataTable row reorder). */
 const canvasProps = computed(() => {
   const p = { ...itemProps.value }
   const compConfig = props.config?.components?.[props.item.type]
   const fields = compConfig?.fields as Record<string, { type?: string; contentEditable?: boolean }> | undefined
-  if (!fields || !props.item.props?.id) return p
-  const permissions = store.getPermissions({ item: props.item })
-  const isReadOnly = permissions?.edit === false
-  return transformPropsForCanvas(p, fields, '', props.item.props.id, isReadOnly)
+  const componentId = props.item.props?.id
+  const base = !fields || !componentId ? p : transformPropsForCanvas(p, fields, '', componentId, store.getPermissions({ item: props.item })?.edit === false)
+  return { ...base, componentId }
 })
 
 const zonesData = computed(() => store.state?.data?.zones || {})

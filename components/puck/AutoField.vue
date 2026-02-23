@@ -45,6 +45,22 @@
       @input="onChange"
     />
 
+    <div v-else-if="fieldType === 'color'" class="puck-field__color-wrap">
+      <input
+        type="color"
+        class="puck-field__color-picker"
+        :value="effectiveColorValue"
+        @change="onColorPickerChange"
+      />
+      <input
+        type="text"
+        class="puck-field__input puck-field__color-text"
+        :value="value ?? ''"
+        placeholder="#ffffff"
+        @input="onChange"
+      />
+    </div>
+
     <ClientOnly v-else-if="fieldType === 'richtext'">
       <PuckRichTextEditor
         :model-value="value ?? ''"
@@ -109,6 +125,21 @@ const options = computed(() => {
   return mapped
 })
 
+const effectiveColorValue = computed(() => {
+  const v = props.value
+  if (typeof v !== 'string' || !v.trim()) return '#ffffff'
+  const hex = v.trim()
+  if (/^#[0-9A-Fa-f]{6}$/.test(hex)) return hex
+  if (/^[0-9A-Fa-f]{6}$/.test(hex)) return `#${hex}`
+  return '#ffffff'
+})
+
+/** Pakai @change (bukan @input) agar hanya emit saat user selesai pilih warna — hindari lag saat drag. */
+function onColorPickerChange(e: Event) {
+  const hex = (e.target as HTMLInputElement).value
+  emit('change', hex)
+}
+
 function onChange(e: Event) {
   const target = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
   let val: any = target.value
@@ -149,4 +180,23 @@ function onChange(e: Event) {
   font-size: 13px; color: #374151; cursor: pointer;
 }
 .puck-field__radio input { accent-color: #6366f1; }
+
+.puck-field__color-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.puck-field__color-picker {
+  width: 40px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.puck-field__color-picker::-webkit-color-swatch-wrapper { padding: 2px; }
+.puck-field__color-picker::-webkit-color-swatch { border: none; border-radius: 4px; }
+.puck-field__color-text { flex: 1; min-width: 0; }
 </style>
