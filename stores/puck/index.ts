@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { markRaw } from 'vue'
 import type {
   Config,
   IframeConfig,
@@ -153,7 +154,7 @@ export const usePuckStore = defineStore('puck', {
       fieldTransforms?: Record<string, (p: any) => any>
       onAction?: (action: PuckAction, newState: AppState, prevState: AppState) => void
     }) {
-      this.config = initial.config
+      this.config = markRaw(initial.config)
       Object.values(this.pendingLoadTimeouts).forEach((t) => clearTimeout(t))
       this.pendingLoadTimeouts = {}
       this.permissionsCache = {}

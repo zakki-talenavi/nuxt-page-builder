@@ -1,4 +1,4 @@
-import { puckConfig, puckComponentKey } from '~/config/puck.config'
+import { puckConfig, puckComponentKey } from '~/config'
 import { getInitialDataForPath } from '~/config/initial-data'
 import { resolveAllData } from '~~/lib/puck/resolve-all-data'
 import type { Data } from '~~/types/puck'

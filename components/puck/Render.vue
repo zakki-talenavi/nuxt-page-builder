@@ -16,11 +16,13 @@ const props = defineProps<{
   data: any
 }>()
 
-provide('puckRenderConfig', computed(() => props.config))
-provide('puckRenderZones', computed(() => props.data?.zones || {}))
+const EMPTY_ZONES: Record<string, any[]> = Object.freeze({})
+
+provide('puckRenderConfig', props.config)
+provide('puckRenderZones', props.data?.zones ?? EMPTY_ZONES)
 
 const content = computed(() => props.data?.content || [])
-const zones = computed(() => props.data?.zones || {})
+const zones = computed(() => props.data?.zones ?? EMPTY_ZONES)
 </script>
 
 <style scoped>

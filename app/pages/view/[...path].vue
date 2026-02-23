@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { puckConfig } from '~/config/puck.config'
+import { puckConfig } from '~/config'
 import { useDemoData } from '~~/composables/useDemoData'
 
 const route = useRoute()
@@ -41,7 +41,7 @@ useHead({
   title: () => (demo.data.value?.root as any)?.props?.title || (demo.data.value?.root as any)?.title || '',
 })
 
-provide('puckConfig', computed(() => puckConfig))
+provide('puckConfig', puckConfig)
 </script>
 
 <style scoped>

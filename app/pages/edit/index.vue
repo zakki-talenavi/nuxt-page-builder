@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { puckConfig } from '~/config/puck.config'
+import { puckConfig } from '~/config'
 import { useDemoData } from '~~/composables/useDemoData'
 
 const demo = useDemoData({
@@ -59,7 +59,7 @@ function viewLink(headerPath: string) {
   return p ? `/view/${p}` : '/view'
 }
 
-provide('puckConfig', computed(() => puckConfig))
+provide('puckConfig', puckConfig)
 </script>
 
 <style scoped>
