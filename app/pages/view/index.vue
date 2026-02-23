@@ -34,8 +34,6 @@ provide('puckConfig', computed(() => puckConfig))
 <style scoped>
 .puck-view {
   width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
   padding: 16px;
   overflow-x: hidden;
 }
