@@ -82,15 +82,15 @@
       </div>
     </template>
 
-    <!-- Single-zone layout (Flex): one drop zone, multiple items -->
+    <!-- Single-zone layout (Flex / Container): one drop zone, multiple items -->
     <template v-else-if="layoutType === 'single-zone'">
       <div
         :style="containerStyle"
-        class="puck-canvas-layout puck-canvas-flex-zone"
-        :class="{ 'is-drag-over': zoneDragOver[flexZoneKey] }"
-        @dragover.prevent.stop="onZoneDragOver($event, flexZoneKey)"
-        @dragleave.stop="onZoneDragLeave(flexZoneKey)"
-        @drop.prevent.stop="onZoneDrop($event, flexZoneKey)"
+        class="puck-canvas-layout puck-canvas-single-zone"
+        :class="{ 'is-drag-over': zoneDragOver[singleZoneKey] }"
+        @dragover.prevent.stop="onZoneDragOver($event, singleZoneKey)"
+        @dragleave.stop="onZoneDragLeave(singleZoneKey)"
+        @drop.prevent.stop="onZoneDrop($event, singleZoneKey)"
       >
         <PuckCanvasItem
           v-for="child in (zoneContentMap.flex ?? [])"
@@ -99,7 +99,7 @@
           :config="config"
           :selected-id="selectedId"
           :hovered-id="hoveredId"
-          :zone="getFlexZoneCompound()"
+          :zone="getSingleZoneCompound()"
           @select="emit('select', $event)"
           @hover="emit('hover', $event)"
           @deselect="emit('deselect')"
@@ -211,7 +211,7 @@ const isInlineComponent = computed(() =>
 const layoutType = computed<'multi-zone' | 'single-zone' | 'none'>(() => {
   const type = props.item.type
   if (type === 'Columns' || type === 'Grid') return 'multi-zone'
-  if (type === 'Flex') return 'single-zone'
+  if (type === 'Flex' || type === 'Container') return 'single-zone'
   return 'none'
 })
 
@@ -226,6 +226,9 @@ const itemId = computed(() => props.item.props?.id || '')
 
 const flexZoneKey = computed(() => `flex-zone`)
 
+/** Zone key for single-zone layouts: Flex uses flex-zone, Container uses default */
+const singleZoneKey = computed(() => (props.item.type === 'Container' ? 'default' : 'flex-zone'))
+
 function getColumnZoneKey(idx: number): string {
   return `column-${idx}`
 }
@@ -236,6 +239,10 @@ function getColumnZoneCompound(idx: number): string {
 
 function getFlexZoneCompound(): string {
   return `${itemId.value}:flex-zone`
+}
+
+function getSingleZoneCompound(): string {
+  return `${itemId.value}:${singleZoneKey.value}`
 }
 
 const containerStyle = computed(() => {
@@ -283,6 +290,14 @@ const containerStyle = computed(() => {
       flexWrap: p.wrap || 'wrap',
       paddingTop: verticalPadding,
       paddingBottom: verticalPadding,
+      minHeight: '60px',
+    }
+  }
+  if (type === 'Container') {
+    return {
+      maxWidth: p.maxWidth || '1200px',
+      margin: '0 auto',
+      padding: p.padding || '0 24px',
       minHeight: '60px',
     }
   }
@@ -388,7 +403,7 @@ const zoneContentMap = computed(() => {
     return { columns }
   }
   if (layoutType.value === 'single-zone') {
-    return { flex: zones[`${itemId.value}:${flexZoneKey.value}`] || [] }
+    return { flex: zones[`${itemId.value}:${singleZoneKey.value}`] || [] }
   }
   return { columns: [] as any[], flex: [] as any[] }
 })
@@ -410,7 +425,7 @@ function registerLayoutZones() {
       }
     }
   } else if (layoutType.value === 'single-zone') {
-    const zoneCompound = getFlexZoneCompound()
+    const zoneCompound = getSingleZoneCompound()
     if (!store.state.indexes?.zones?.[zoneCompound]) {
       store.dispatch({ type: 'registerZone', zone: zoneCompound })
     }
@@ -601,7 +616,8 @@ onBeforeUnmount(() => {
   text-align: center; word-break: break-word; overflow: hidden;
 }
 
-.puck-canvas-flex-zone {
+.puck-canvas-flex-zone,
+.puck-canvas-single-zone {
   border: 2px dashed #e5e7eb;
   border-radius: 8px;
   background: #fafbfc;
@@ -613,10 +629,13 @@ onBeforeUnmount(() => {
   z-index: 0;
 }
 .puck-canvas-flex-zone:has(.puck-canvas-item.is-selected),
-.puck-canvas-flex-zone:has(.puck-canvas-item.is-hovered) {
+.puck-canvas-flex-zone:has(.puck-canvas-item.is-hovered),
+.puck-canvas-single-zone:has(.puck-canvas-item.is-selected),
+.puck-canvas-single-zone:has(.puck-canvas-item.is-hovered) {
   z-index: 1;
 }
-.puck-canvas-flex-zone.is-drag-over {
+.puck-canvas-flex-zone.is-drag-over,
+.puck-canvas-single-zone.is-drag-over {
   background: rgba(99, 102, 241, 0.05);
   border-color: #6366f1;
 }

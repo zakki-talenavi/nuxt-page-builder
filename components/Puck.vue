@@ -163,6 +163,8 @@ function buildOutlineTree(content: any[], zones: Record<string, any[]>): Outline
       }
     } else if (type === 'Flex') {
       childList = zones[`${id}:flex-zone`] || []
+    } else if (type === 'Container') {
+      childList = zones[`${id}:default`] || []
     }
     return {
       type: item.type,

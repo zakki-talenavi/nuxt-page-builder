@@ -56,7 +56,7 @@ const renderer = computed(() => props.config?.components?.[props.item.type]?.ren
 const layoutType = computed<'multi-zone' | 'single-zone' | 'none'>(() => {
   const type = props.item.type
   if (type === 'Columns' || type === 'Grid') return 'multi-zone'
-  if (type === 'Flex') return 'single-zone'
+  if (type === 'Flex' || type === 'Container') return 'single-zone'
   return 'none'
 })
 
@@ -80,8 +80,10 @@ function getColumnContent(idx: number): any[] {
   return props.zones?.[zoneKey] || []
 }
 
+const singleZoneKey = computed(() => (props.item.type === 'Container' ? 'default' : 'flex-zone'))
+
 const flexContent = computed(() => {
-  const zoneKey = `${itemId.value}:flex-zone`
+  const zoneKey = `${itemId.value}:${singleZoneKey.value}`
   return props.zones?.[zoneKey] || []
 })
 </script>

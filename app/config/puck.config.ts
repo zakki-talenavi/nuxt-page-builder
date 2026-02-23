@@ -374,6 +374,27 @@ const FlexBlock = defineComponent({
   },
 })
 
+// ── Container ──
+
+const ContainerBlock = defineComponent({
+  name: 'ContainerBlock',
+  props: {
+    maxWidth: { type: String, default: '1200px' },
+    padding: { type: String, default: '0 24px' },
+  },
+  setup(props, { slots }) {
+    return () =>
+      h('div', {
+        style: {
+          maxWidth: props.maxWidth,
+          margin: '0 auto',
+          padding: props.padding,
+          minHeight: '60px',
+        },
+      }, slots.default?.() || [])
+  },
+})
+
 // ── Space ──
 
 const SpaceBlock = defineComponent({
@@ -498,7 +519,7 @@ export const puckComponentKey = 'puck-nuxt-v1'
 
 export const puckConfig = {
   categories: {
-    layout: { title: 'Layout', components: ['Grid', 'Flex', 'Columns', 'Space'] },
+    layout: { title: 'Layout', components: ['Grid', 'Flex', 'Container', 'Columns', 'Space'] },
     typography: { title: 'Typography', components: ['Heading', 'Text', 'RichText'] },
     navigation: { title: 'Navigation', components: ['Breadcrumb'] },
     actions: { title: 'Actions', components: ['Button'] },
@@ -972,6 +993,18 @@ export const puckConfig = {
         },
       },
       render: markRaw(FlexBlock),
+    },
+    Container: {
+      label: 'Container',
+      defaultProps: {
+        maxWidth: '1200px',
+        padding: '0 24px',
+      },
+      fields: {
+        maxWidth: { type: 'text', label: 'Max width' },
+        padding: { type: 'text', label: 'Padding' },
+      },
+      render: markRaw(ContainerBlock),
     },
     Columns: {
       label: 'Columns',
