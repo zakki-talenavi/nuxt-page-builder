@@ -1,5 +1,6 @@
-import { h, defineComponent, markRaw } from 'vue'
+import { h, defineComponent, markRaw, isVNode } from 'vue'
 
+// Aligned with puck-main options (8px–160px) plus 0px and 4px for flexibility
 const spacingOptions = [
   { label: '0px', value: '0px' },
   { label: '4px', value: '4px' },
@@ -7,18 +8,33 @@ const spacingOptions = [
   { label: '16px', value: '16px' },
   { label: '24px', value: '24px' },
   { label: '32px', value: '32px' },
+  { label: '40px', value: '40px' },
   { label: '48px', value: '48px' },
+  { label: '56px', value: '56px' },
   { label: '64px', value: '64px' },
+  { label: '72px', value: '72px' },
+  { label: '80px', value: '80px' },
+  { label: '88px', value: '88px' },
+  { label: '96px', value: '96px' },
+  { label: '104px', value: '104px' },
+  { label: '112px', value: '112px' },
+  { label: '120px', value: '120px' },
+  { label: '128px', value: '128px' },
+  { label: '136px', value: '136px' },
+  { label: '144px', value: '144px' },
+  { label: '152px', value: '152px' },
+  { label: '160px', value: '160px' },
 ]
 
+// Order matches puck-main: xxxl → xs
 const sizeOptions = [
-  { label: 'XS', value: 'xs' },
-  { label: 'S', value: 's' },
-  { label: 'M', value: 'm' },
-  { label: 'L', value: 'l' },
-  { label: 'XL', value: 'xl' },
-  { label: 'XXL', value: 'xxl' },
   { label: 'XXXL', value: 'xxxl' },
+  { label: 'XXL', value: 'xxl' },
+  { label: 'XL', value: 'xl' },
+  { label: 'L', value: 'l' },
+  { label: 'M', value: 'm' },
+  { label: 'S', value: 's' },
+  { label: 'XS', value: 'xs' },
 ]
 
 const sizeMap: Record<string, string> = {
@@ -41,12 +57,20 @@ const HeroBlock = defineComponent({
     align: { type: String, default: 'left' },
     padding: { type: String, default: '64px' },
     buttons: { type: Array, default: () => [{ label: 'Learn more', href: '#' }] },
+    layout: {
+      type: Object as () => { padding?: string },
+      default: () => ({ padding: '0px' }),
+    },
   },
   setup(props) {
-    return () =>
-      h('section', {
+    return () => {
+      const verticalPadding = props.layout?.padding ?? '0px'
+      return h('section', {
         style: {
-          padding: `${props.padding} 24px`,
+          paddingTop: verticalPadding,
+          paddingBottom: verticalPadding,
+          paddingLeft: '24px',
+          paddingRight: '24px',
           textAlign: props.align,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: '#fff',
@@ -54,7 +78,9 @@ const HeroBlock = defineComponent({
         },
       }, [
         h('h1', { style: { margin: '0 0 12px', fontSize: '2.5rem', fontWeight: '700' } }, props.title),
-        h('div', { style: { margin: '0 0 24px', fontSize: '1.1rem', opacity: '0.9' }, innerHTML: props.description }),
+        isVNode(props.description)
+          ? h('div', { style: { margin: '0 0 24px', fontSize: '1.1rem', opacity: '0.9' } }, [props.description])
+          : h('div', { style: { margin: '0 0 24px', fontSize: '1.1rem', opacity: '0.9' }, innerHTML: props.description }),
         h('div', { style: { display: 'flex', gap: '12px', justifyContent: props.align === 'center' ? 'center' : 'flex-start' } },
           (props.buttons as any[]).map((btn: any, i: number) =>
             h('a', {
@@ -71,6 +97,7 @@ const HeroBlock = defineComponent({
           )
         ),
       ])
+    }
   },
 })
 
@@ -83,15 +110,19 @@ const HeadingBlock = defineComponent({
     size: { type: String, default: 'm' },
     level: { type: String, default: '' },
     align: { type: String, default: 'left' },
-    padding: { type: String, default: '8px' },
+    layout: {
+      type: Object as () => { padding?: string; verticalPadding?: string },
+      default: () => ({ padding: '8px' }),
+    },
   },
   setup(props) {
     return () => {
       const tag = props.level ? `h${props.level}` : 'span'
       const fontSize = headingSizeMap[props.size] || '1.5rem'
+      const padding = props.layout?.padding ?? props.layout?.verticalPadding ?? '8px'
       return h(tag, {
         style: {
-          display: 'block', padding: props.padding, margin: '0', color: '#1f2937',
+          display: 'block', paddingTop: padding, paddingBottom: padding, margin: '0', color: '#1f2937',
           fontSize, fontWeight: '700', textAlign: props.align, lineHeight: '1.2',
         },
       }, props.text)
@@ -109,18 +140,23 @@ const TextBlock = defineComponent({
     align: { type: String, default: 'left' },
     color: { type: String, default: 'default' },
     maxWidth: { type: String, default: '' },
-    padding: { type: String, default: '8px' },
+    layout: {
+      type: Object as () => { padding?: string; verticalPadding?: string },
+      default: () => ({ padding: '0px' }),
+    },
   },
   setup(props) {
-    return () =>
-      h('p', {
+    return () => {
+      const padding = props.layout?.padding ?? props.layout?.verticalPadding ?? '0px'
+      return h('p', {
         style: {
-          padding: props.padding, margin: '0', textAlign: props.align,
+          paddingTop: padding, paddingBottom: padding, margin: '0', textAlign: props.align,
           fontSize: sizeMap[props.size] || '1rem', lineHeight: '1.7',
           color: props.color === 'muted' ? '#6b7280' : '#374151',
           maxWidth: props.maxWidth || 'none',
         },
       }, props.text)
+    }
   },
 })
 
@@ -130,14 +166,21 @@ const RichTextBlock = defineComponent({
   name: 'RichTextBlock',
   props: {
     richtext: { type: String, default: '<h2>Heading</h2><p>Body</p>' },
-    padding: { type: String, default: '8px' },
+    layout: {
+      type: Object as () => { padding?: string; verticalPadding?: string },
+      default: () => ({ padding: '0px' }),
+    },
   },
   setup(props) {
-    return () =>
-      h('div', {
-        style: { padding: props.padding, color: '#374151', lineHeight: '1.7' },
-        innerHTML: props.richtext,
-      })
+    return () => {
+      const padding = props.layout?.padding ?? props.layout?.verticalPadding ?? '0px'
+      return isVNode(props.richtext)
+        ? h('div', { style: { paddingTop: padding, paddingBottom: padding, color: '#374151', lineHeight: '1.7' } }, [props.richtext])
+        : h('div', {
+            style: { paddingTop: padding, paddingBottom: padding, color: '#374151', lineHeight: '1.7' },
+            innerHTML: props.richtext,
+          })
+    }
   },
 })
 
@@ -154,13 +197,18 @@ const CardBlock = defineComponent({
     title: { type: String, default: 'Title' },
     description: { type: String, default: 'Description' },
     icon: { type: String, default: '✦' },
-    mode: { type: String, default: 'card' },
+    mode: { type: String, default: 'flat' },
+    layout: {
+      type: Object as () => { padding?: string; verticalPadding?: string },
+      default: () => ({ padding: '0px' }),
+    },
   },
   setup(props) {
-    return () =>
-      h('div', {
+    return () => {
+      const padding = props.layout?.padding ?? props.layout?.verticalPadding ?? '0px'
+      return h('div', {
         style: {
-          padding: '24px',
+          paddingTop: padding, paddingBottom: padding, paddingLeft: '24px', paddingRight: '24px',
           background: props.mode === 'card' ? '#fff' : 'transparent',
           border: props.mode === 'card' ? '1px solid #e5e7eb' : 'none',
           borderRadius: props.mode === 'card' ? '12px' : '0',
@@ -171,6 +219,7 @@ const CardBlock = defineComponent({
         h('h3', { style: { margin: '0 0 8px', fontSize: '1.1rem', fontWeight: '600', color: '#1f2937' } }, props.title),
         h('p', { style: { margin: '0', fontSize: '0.9rem', color: '#6b7280', lineHeight: '1.6' } }, props.description),
       ])
+    }
   },
 })
 
@@ -433,28 +482,43 @@ export const puckConfig = {
     Hero: {
       label: 'Hero',
       defaultProps: {
-        title: 'Welcome to Puck',
-        description: '<p>A visual editor for the web</p>',
+        title: 'Hero',
+        description: '<p>Description</p>',
         align: 'left',
         padding: '64px',
-        buttons: [{ label: 'Learn more', href: '#', variant: 'primary' }],
+        buttons: [{ label: 'Learn more', href: '#' }],
+        layout: { padding: '0px' },
       },
       fields: {
-        title: { type: 'text', label: 'Title' },
-        description: { type: 'richtext', label: 'Description' },
+        title: { type: 'text', label: 'Title', contentEditable: true },
+        description: { type: 'richtext', label: 'Description', contentEditable: true },
         align: {
           type: 'radio', label: 'Alignment',
-          options: [{ label: 'Left', value: 'left' }, { label: 'Center', value: 'center' }],
+          options: [{ label: 'left', value: 'left' }, { label: 'center', value: 'center' }],
         },
         padding: { type: 'select', label: 'Padding', options: spacingOptions },
         buttons: {
           type: 'array', label: 'Buttons',
+          min: 1,
+          max: 4,
           arrayFields: {
-            label: { type: 'text', label: 'Label' },
+            label: { type: 'text', label: 'Label', contentEditable: true },
             href: { type: 'text', label: 'URL' },
             variant: {
-              type: 'radio', label: 'Variant',
-              options: [{ label: 'Primary', value: 'primary' }, { label: 'Secondary', value: 'secondary' }],
+              type: 'select', label: 'Variant',
+              options: [{ label: 'primary', value: 'primary' }, { label: 'secondary', value: 'secondary' }],
+            },
+          },
+          defaultItemProps: { label: 'Button', href: '#' },
+        },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            padding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
             },
           },
         },
@@ -463,35 +527,45 @@ export const puckConfig = {
     },
     Heading: {
       label: 'Heading',
-      defaultProps: { text: 'Heading', size: 'm', level: '', align: 'left', padding: '8px' },
+      defaultProps: { text: 'Heading', size: 'm', level: '', align: 'left', layout: { padding: '8px' } },
       fields: {
-        text: { type: 'textarea', label: 'Text' },
+        text: { type: 'textarea', label: 'Text', contentEditable: true },
         size: { type: 'select', label: 'Size', options: sizeOptions },
         level: {
           type: 'select', label: 'Semantic Level',
           options: [
             { label: 'None', value: '' },
-            { label: 'H1', value: '1' }, { label: 'H2', value: '2' },
-            { label: 'H3', value: '3' }, { label: 'H4', value: '4' },
-            { label: 'H5', value: '5' }, { label: 'H6', value: '6' },
+            { label: '1', value: '1' }, { label: '2', value: '2' },
+            { label: '3', value: '3' }, { label: '4', value: '4' },
+            { label: '5', value: '5' }, { label: '6', value: '6' },
           ],
         },
         align: {
           type: 'radio', label: 'Alignment',
           options: [{ label: 'Left', value: 'left' }, { label: 'Center', value: 'center' }, { label: 'Right', value: 'right' }],
         },
-        padding: { type: 'select', label: 'Padding', options: spacingOptions },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            padding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
+            },
+          },
+        },
       },
       render: markRaw(HeadingBlock),
     },
     Text: {
       label: 'Text',
-      defaultProps: { text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', size: 'm', align: 'left', color: 'default', maxWidth: '', padding: '8px' },
+      defaultProps: { text: 'Text', size: 'm', align: 'left', color: 'default', maxWidth: '', layout: { padding: '0px' } },
       fields: {
-        text: { type: 'textarea', label: 'Content' },
+        text: { type: 'textarea', label: 'Text', contentEditable: true },
         size: {
           type: 'select', label: 'Size',
-          options: [{ label: 'Small', value: 's' }, { label: 'Medium', value: 'm' }],
+          options: [{ label: 'S', value: 's' }, { label: 'M', value: 'm' }],
         },
         align: {
           type: 'radio', label: 'Alignment',
@@ -502,16 +576,36 @@ export const puckConfig = {
           options: [{ label: 'Default', value: 'default' }, { label: 'Muted', value: 'muted' }],
         },
         maxWidth: { type: 'text', label: 'Max Width' },
-        padding: { type: 'select', label: 'Padding', options: spacingOptions },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            padding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
+            },
+          },
+        },
       },
       render: markRaw(TextBlock),
     },
     RichText: {
       label: 'Rich Text',
-      defaultProps: { richtext: '<h2>Heading</h2><p>Body text goes here.</p>', padding: '8px' },
+      defaultProps: { richtext: '<h2>Heading</h2><p>Body</p>', layout: { padding: '0px' } },
       fields: {
-        richtext: { type: 'richtext', label: 'Content' },
-        padding: { type: 'select', label: 'Padding', options: spacingOptions },
+        richtext: { type: 'richtext', label: 'Content', contentEditable: true },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            padding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
+            },
+          },
+        },
       },
       render: markRaw(RichTextBlock),
     },
@@ -558,49 +652,27 @@ export const puckConfig = {
         href: '#',
         variant: 'primary',
         actionType: 'link',
-        modalTitle: '',
-        modalContentType: 'richtext',
-        modalContent: '<p>Isi modal di sini.</p>',
-        formId: '',
       },
       fields: {
-        label: { type: 'text', label: 'Label' },
-        actionType: {
-          type: 'radio',
-          label: 'Aksi',
-          options: [
-            { label: 'Link (ke URL)', value: 'link' },
-            { label: 'Buka modal', value: 'modal' },
-          ],
-        },
-        href: { type: 'text', label: 'URL (untuk link)' },
+        label: { type: 'text', label: 'Label', placeholder: 'Lorem ipsum...', contentEditable: true },
+        href: { type: 'text', label: 'URL' },
         variant: {
           type: 'radio',
           label: 'Variant',
-          options: [{ label: 'Primary', value: 'primary' }, { label: 'Secondary', value: 'secondary' }],
+          options: [{ label: 'primary', value: 'primary' }, { label: 'secondary', value: 'secondary' }],
         },
-        modalTitle: { type: 'text', label: 'Judul modal' },
-        modalContentType: {
-          type: 'radio',
-          label: 'Tipe konten modal',
-          options: [
-            { label: 'Rich text', value: 'richtext' },
-            { label: 'Form (dari Form Builder)', value: 'form' },
-          ],
-        },
-        modalContent: { type: 'richtext', label: 'Konten modal (untuk rich text)' },
-        formId: { type: 'text', label: 'ID Form (dari Form Builder)' },
       },
       render: markRaw(ButtonBlockVue),
     },
     Card: {
       label: 'Card',
-      defaultProps: { title: 'Title', description: 'Description', icon: '✦', mode: 'card' },
+      defaultProps: { title: 'Title', description: 'Description', icon: '✦', mode: 'flat', layout: { padding: '0px' } },
       fields: {
-        title: { type: 'text', label: 'Title' },
-        description: { type: 'textarea', label: 'Description' },
+        title: { type: 'text', label: 'Title', contentEditable: true },
+        description: { type: 'textarea', label: 'Description', contentEditable: true },
         icon: {
-          type: 'select', label: 'Icon',
+          type: 'select',
+          label: 'Icon',
           options: [
             { label: '✦ Star', value: '✦' }, { label: '⚡ Lightning', value: '⚡' },
             { label: '🎯 Target', value: '🎯' }, { label: '🚀 Rocket', value: '🚀' },
@@ -609,8 +681,20 @@ export const puckConfig = {
           ],
         },
         mode: {
-          type: 'radio', label: 'Mode',
-          options: [{ label: 'Card', value: 'card' }, { label: 'Flat', value: 'flat' }],
+          type: 'radio',
+          label: 'Mode',
+          options: [{ label: 'card', value: 'card' }, { label: 'flat', value: 'flat' }],
+        },
+        layout: {
+          type: 'object',
+          label: 'Layout',
+          objectFields: {
+            padding: {
+              type: 'select',
+              label: 'Vertical Padding',
+              options: spacingOptions,
+            },
+          },
         },
       },
       render: markRaw(CardBlock),
@@ -725,12 +809,16 @@ export const puckConfig = {
     },
     Space: {
       label: 'Space',
-      defaultProps: { size: '24px', direction: '' },
+      defaultProps: { direction: '', size: '24px' },
       fields: {
         size: { type: 'select', label: 'Size', options: spacingOptions },
         direction: {
           type: 'radio', label: 'Direction',
-          options: [{ label: 'Both', value: '' }, { label: 'Vertical', value: 'vertical' }, { label: 'Horizontal', value: 'horizontal' }],
+          options: [
+            { label: 'Vertical', value: 'vertical' },
+            { label: 'Horizontal', value: 'horizontal' },
+            { label: 'Both', value: '' },
+          ],
         },
       },
       render: markRaw(SpaceBlock),
@@ -739,19 +827,22 @@ export const puckConfig = {
       label: 'Logos',
       defaultProps: {
         logos: [
-          { alt: 'Logo 1', imageUrl: 'https://placehold.co/120x40/e2e8f0/94a3b8?text=Logo+1' },
-          { alt: 'Logo 2', imageUrl: 'https://placehold.co/120x40/e2e8f0/94a3b8?text=Logo+2' },
-          { alt: 'Logo 3', imageUrl: 'https://placehold.co/120x40/e2e8f0/94a3b8?text=Logo+3' },
-          { alt: 'Logo 4', imageUrl: 'https://placehold.co/120x40/e2e8f0/94a3b8?text=Logo+4' },
+          { alt: '', imageUrl: 'https://logolook.net/wp-content/uploads/2021/06/Google-Logo.png' },
+          { alt: '', imageUrl: 'https://logolook.net/wp-content/uploads/2021/06/Google-Logo.png' },
+          { alt: '', imageUrl: 'https://logolook.net/wp-content/uploads/2021/06/Google-Logo.png' },
+          { alt: '', imageUrl: 'https://logolook.net/wp-content/uploads/2021/06/Google-Logo.png' },
+          { alt: '', imageUrl: 'https://logolook.net/wp-content/uploads/2021/06/Google-Logo.png' },
         ],
       },
       fields: {
         logos: {
-          type: 'array', label: 'Logos',
+          type: 'array',
+          label: 'Logos',
           arrayFields: {
-            alt: { type: 'text', label: 'Alt text' },
+            alt: { type: 'text', label: 'Alt' },
             imageUrl: { type: 'text', label: 'Image URL' },
           },
+          defaultItemProps: { alt: '', imageUrl: '' },
         },
       },
       render: markRaw(LogosBlock),
@@ -759,19 +850,17 @@ export const puckConfig = {
     Stats: {
       label: 'Stats',
       defaultProps: {
-        items: [
-          { title: 'Users', description: '10,000+' },
-          { title: 'Revenue', description: '$1.2M' },
-          { title: 'Growth', description: '150%' },
-        ],
+        items: [{ title: 'Stat', description: '1,000' }],
       },
       fields: {
         items: {
-          type: 'array', label: 'Stats',
+          type: 'array',
+          label: 'Stats',
           arrayFields: {
-            title: { type: 'text', label: 'Label' },
-            description: { type: 'text', label: 'Value' },
+            title: { type: 'text', label: 'Title', contentEditable: true },
+            description: { type: 'text', label: 'Description', contentEditable: true },
           },
+          defaultItemProps: { title: 'Stat', description: '1,000' },
         },
       },
       render: markRaw(StatsBlock),
@@ -798,8 +887,9 @@ export const puckConfig = {
   },
   root: {
     label: 'Page',
+    defaultProps: { title: 'My Page' },
     fields: {
-      title: { type: 'text', label: 'Page Title' },
+      title: { type: 'text', label: 'Title' },
     },
   },
 }

@@ -7,7 +7,8 @@
       class="puck-button-block__btn"
       :class="btnClass"
     >
-      {{ label }}
+      <component v-if="isLabelVNode" :is="label" />
+      <template v-else>{{ label }}</template>
     </a>
 
     <!-- Modal: render as button that opens modal -->
@@ -18,11 +19,12 @@
         :class="btnClass"
         @click="openModal"
       >
-        {{ label }}
+        <component v-if="isLabelVNode" :is="label" />
+        <template v-else>{{ label }}</template>
       </button>
       <PuckModal
         v-model="showModal"
-        :title="modalTitle || label"
+        :title="modalTitle || (isLabelVNode ? 'Button' : (label as string))"
         :max-width="520"
       >
         <!-- Rich text content -->
@@ -130,6 +132,11 @@ const btnClass = computed(() => ({
   'puck-button-block__btn--primary': props.variant !== 'secondary',
   'puck-button-block__btn--secondary': props.variant === 'secondary',
 }))
+
+/** In edit mode label can be a VNode (InlineTextEdit) for in-canvas editing */
+const isLabelVNode = computed(() =>
+  typeof props.label === 'object' && props.label !== null && !!(props.label as any).__v_isVNode
+)
 
 const normalizedFormFields = computed(() => {
   const list = fields.value || []

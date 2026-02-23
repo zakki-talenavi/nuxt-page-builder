@@ -112,12 +112,12 @@
       </div>
     </template>
 
-    <!-- Regular component: use render function -->
+    <!-- Regular component: use render function; pass canvasProps for in-canvas editable fields -->
     <template v-else>
       <component
         v-if="renderer"
         :is="renderer"
-        v-bind="itemProps"
+        v-bind="canvasProps"
       />
       <div v-else class="puck-canvas-item__placeholder">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
@@ -131,7 +131,9 @@
 </template>
 
 <script setup lang="ts">
+import { h } from 'vue'
 import { usePuckStore } from '~~/stores/puck'
+import PuckInlineTextEdit from '~~/components/puck/InlineTextEdit.vue'
 
 const store = usePuckStore()
 
@@ -289,6 +291,77 @@ const itemProps = computed(() => {
   return p
 })
 
+/** Recursively replace contentEditable text/textarea with InlineTextEdit VNodes (supports array paths like buttons[0].label). */
+function transformPropsForCanvas(
+  propsSource: Record<string, any>,
+  fields: Record<string, any>,
+  basePath: string,
+  componentId: string,
+  isReadOnly: boolean
+): Record<string, any> {
+  const out = { ...propsSource }
+  for (const [key, field] of Object.entries(fields)) {
+    if (!field || field.type === 'slot') continue
+    const path = basePath ? `${basePath}.${key}` : key
+
+    if (field.type === 'array' && field.arrayFields) {
+      const arr = Array.isArray(out[key]) ? out[key] : []
+      out[key] = arr.map((item: any, i: number) => {
+        const row = item && typeof item === 'object' ? { ...item } : {}
+        for (const [subKey, subField] of Object.entries(field.arrayFields as Record<string, any>)) {
+          if (subField?.contentEditable && (subField.type === 'text' || subField.type === 'textarea' || subField.type === 'richtext')) {
+            const fullPath = `${key}[${i}].${subKey}`
+            row[subKey] = h(PuckInlineTextEdit, {
+              value: String(row[subKey] ?? ''),
+              propPath: fullPath,
+              componentId,
+              isReadOnly,
+              disableLineBreaks: subField.type === 'text',
+              rich: subField.type === 'richtext',
+            })
+          }
+        }
+        return row
+      })
+      continue
+    }
+
+    if (field.type === 'object' && field.objectFields) {
+      out[key] = transformPropsForCanvas(
+        out[key] && typeof out[key] === 'object' ? out[key] : {},
+        field.objectFields,
+        path,
+        componentId,
+        isReadOnly
+      )
+      continue
+    }
+
+    if (field?.contentEditable && (field.type === 'text' || field.type === 'textarea' || field.type === 'richtext')) {
+      out[key] = h(PuckInlineTextEdit, {
+        value: String(out[key] ?? ''),
+        propPath: path,
+        componentId,
+        isReadOnly,
+        disableLineBreaks: field.type === 'text',
+        rich: field.type === 'richtext',
+      })
+    }
+  }
+  return out
+}
+
+/** Props with contentEditable fields replaced by InlineTextEdit VNodes for in-canvas editing */
+const canvasProps = computed(() => {
+  const p = { ...itemProps.value }
+  const compConfig = props.config?.components?.[props.item.type]
+  const fields = compConfig?.fields as Record<string, { type?: string; contentEditable?: boolean }> | undefined
+  if (!fields || !props.item.props?.id) return p
+  const permissions = store.getPermissions({ item: props.item })
+  const isReadOnly = permissions?.edit === false
+  return transformPropsForCanvas(p, fields, '', props.item.props.id, isReadOnly)
+})
+
 const zonesData = computed(() => store.state?.data?.zones || {})
 
 function getZoneContent(zoneKey: string): any[] {
@@ -360,7 +433,9 @@ function getDropIndex(e: DragEvent, zoneKey: string): number {
   const isVertical = layoutType.value === 'multi-zone' // columns stack items vertically
   
   for (let i = 0; i < items.length; i++) {
-    const rect = items[i].getBoundingClientRect()
+    const el = items[i]
+    if (!el) continue
+    const rect = el.getBoundingClientRect()
     if (isVertical) {
       if (e.clientY < rect.top + rect.height / 2) return i
     } else {
