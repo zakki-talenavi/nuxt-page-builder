@@ -1,27 +1,78 @@
 <template>
   <div class="puck-button-block">
-    <!-- Link: render as anchor -->
-    <a
+    <!-- Link: PrimeVue Button as anchor -->
+    <Button
       v-if="actionType === 'link'"
+      as="a"
       :href="href"
+      :label="isLabelVNode ? undefined : (label as string)"
+      :icon="icon || undefined"
+      :icon-pos="iconPos"
+      :severity="effectiveSeverity"
+      :variant="variantProp"
+      :size="sizeProp"
+      :raised="raised"
+      :rounded="rounded"
+      :disabled="disabled"
+      :loading="loading"
+      :badge="badge || undefined"
+      :badge-severity="badge ? badgeSeverity : undefined"
+      :aria-label="ariaLabel || undefined"
       class="puck-button-block__btn"
-      :class="btnClass"
     >
-      <component v-if="isLabelVNode" :is="label" />
-      <template v-else>{{ label }}</template>
-    </a>
+      <template v-if="isLabelVNode">
+        <component :is="label" />
+      </template>
+    </Button>
 
-    <!-- Modal: render as button that opens modal -->
+    <!-- Button (plain): type = button | submit | reset -->
+    <Button
+      v-else-if="actionType === 'button'"
+      :type="buttonType"
+      :label="isLabelVNode ? undefined : (label as string)"
+      :icon="icon || undefined"
+      :icon-pos="iconPos"
+      :severity="effectiveSeverity"
+      :variant="variantProp"
+      :size="sizeProp"
+      :raised="raised"
+      :rounded="rounded"
+      :disabled="disabled"
+      :loading="loading"
+      :badge="badge || undefined"
+      :badge-severity="badge ? badgeSeverity : undefined"
+      :aria-label="ariaLabel || undefined"
+      class="puck-button-block__btn"
+    >
+      <template v-if="isLabelVNode">
+        <component :is="label" />
+      </template>
+    </Button>
+
+    <!-- Modal: always type="button" so click only opens modal -->
     <template v-else>
-      <button
+      <Button
         type="button"
+        :label="isLabelVNode ? undefined : (label as string)"
+        :icon="icon || undefined"
+        :icon-pos="iconPos"
+        :severity="effectiveSeverity"
+        :variant="variantProp"
+        :size="sizeProp"
+        :raised="raised"
+        :rounded="rounded"
+        :disabled="disabled"
+        :loading="loading"
+        :badge="badge || undefined"
+        :badge-severity="badge ? badgeSeverity : undefined"
+        :aria-label="ariaLabel || undefined"
         class="puck-button-block__btn"
-        :class="btnClass"
         @click="openModal"
       >
-        <component v-if="isLabelVNode" :is="label" />
-        <template v-else>{{ label }}</template>
-      </button>
+        <template v-if="isLabelVNode">
+          <component :is="label" />
+        </template>
+      </Button>
       <PuckModal
         v-model="showModal"
         :title="modalTitle || (isLabelVNode ? 'Button' : (label as string))"
@@ -92,6 +143,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from 'primevue/button'
 import type { FormFieldSchema } from '~~/composables/useFormSchema'
 import { useFormSchema } from '~~/composables/useFormSchema'
 
@@ -99,19 +151,45 @@ const props = withDefaults(
   defineProps<{
     label?: string
     href?: string
+    /** PrimeVue severity: primary, secondary, success, info, warn, help, danger, contrast */
+    severity?: string
+    /** PrimeVue variant: filled, text, outlined, link */
     variant?: string
-    actionType?: 'link' | 'modal'
+    actionType?: 'link' | 'button' | 'modal'
+    /** HTML button type: button | submit | reset (only when not link) */
+    buttonType?: 'button' | 'submit' | 'reset'
+    icon?: string
+    iconPos?: 'left' | 'right' | 'top' | 'bottom'
+    size?: 'small' | 'normal' | 'large'
+    raised?: boolean
+    rounded?: boolean
+    disabled?: boolean
+    loading?: boolean
+    badge?: string
+    badgeSeverity?: string
+    ariaLabel?: string
     modalTitle?: string
     modalContentType?: 'richtext' | 'form'
     modalContent?: string
-    /** ID form dari form builder. Definisi form (field, dll) tidak di sini. */
     formId?: string
   }>(),
   {
     label: 'Button',
     href: '#',
-    variant: 'primary',
-    actionType: 'link',
+    severity: 'primary',
+    variant: 'filled',
+    actionType: 'button',
+    buttonType: 'button',
+    icon: '',
+    iconPos: 'left',
+    size: 'normal',
+    raised: false,
+    rounded: false,
+    disabled: false,
+    loading: false,
+    badge: '',
+    badgeSeverity: 'danger',
+    ariaLabel: '',
     modalTitle: '',
     modalContentType: 'richtext',
     modalContent: '',
@@ -128,10 +206,22 @@ const formData = ref<Record<string, string>>({})
 
 const { schema, fields, submitLabel } = useFormSchema(props.formId)
 
-const btnClass = computed(() => ({
-  'puck-button-block__btn--primary': props.variant !== 'secondary',
-  'puck-button-block__btn--secondary': props.variant === 'secondary',
-}))
+/** Severity: use severity prop, or fallback for old data that only had variant (primary/secondary) */
+const effectiveSeverity = computed(() => {
+  if (props.severity) return props.severity
+  if (props.variant === 'secondary') return 'secondary'
+  return 'primary'
+})
+/** PrimeVue variant (style): filled = default, only pass text/outlined/link */
+const variantProp = computed(() => {
+  const v = props.variant
+  if (!v || v === 'filled' || v === 'primary' || v === 'secondary') return undefined
+  return v
+})
+/** PrimeVue size: omit when normal */
+const sizeProp = computed(() =>
+  props.size === 'normal' || !props.size ? undefined : props.size
+)
 
 /** In edit mode label can be a VNode (InlineTextEdit) for in-canvas editing */
 const isLabelVNode = computed(() =>
@@ -174,33 +264,8 @@ function onFormSubmit() {
 
 <style scoped>
 .puck-button-block { padding: 8px 0; }
-.puck-button-block__btn {
-  display: inline-block;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-decoration: none;
-  border: none;
-  font-family: inherit;
-}
-.puck-button-block__btn--primary {
-  background: #6366f1;
-  color: #fff;
-}
-.puck-button-block__btn--primary:hover {
-  background: #4f46e5;
-}
-.puck-button-block__btn--secondary {
-  background: #fff;
-  color: #6366f1;
-  border: 2px solid #6366f1;
-}
-.puck-button-block__btn--secondary:hover {
-  background: #eef2ff;
-}
+/* PrimeVue Button handles styling; we only add spacing if needed */
+.puck-button-block__btn { margin: 0; }
 
 .puck-button-block__modal-body :deep(p) { margin: 0 0 12px; }
 .puck-button-block__modal-body :deep(p:last-child) { margin-bottom: 0; }
