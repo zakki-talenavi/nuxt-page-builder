@@ -6,7 +6,7 @@
       as="a"
       :href="href"
       :label="isLabelVNode ? undefined : (label as string)"
-      :icon="icon || undefined"
+      :icon="(isLabelVNode && icon) ? undefined : (icon || undefined)"
       :icon-pos="iconPos"
       :severity="effectiveSeverity"
       :variant="variantProp"
@@ -21,7 +21,10 @@
       class="puck-button-block__btn"
     >
       <template v-if="isLabelVNode">
-        <component :is="label" />
+        <span class="puck-button-block__slot" :class="`puck-button-block__slot--icon-${iconPos}`">
+          <i v-if="icon" :class="icon" class="puck-button-block__icon" aria-hidden="true" />
+          <component :is="label" />
+        </span>
       </template>
     </Button>
 
@@ -30,7 +33,7 @@
       v-else-if="actionType === 'button'"
       :type="buttonType"
       :label="isLabelVNode ? undefined : (label as string)"
-      :icon="icon || undefined"
+      :icon="(isLabelVNode && icon) ? undefined : (icon || undefined)"
       :icon-pos="iconPos"
       :severity="effectiveSeverity"
       :variant="variantProp"
@@ -45,7 +48,10 @@
       class="puck-button-block__btn"
     >
       <template v-if="isLabelVNode">
-        <component :is="label" />
+        <span class="puck-button-block__slot" :class="`puck-button-block__slot--icon-${iconPos}`">
+          <i v-if="icon" :class="icon" class="puck-button-block__icon" aria-hidden="true" />
+          <component :is="label" />
+        </span>
       </template>
     </Button>
 
@@ -54,7 +60,7 @@
       <Button
         type="button"
         :label="isLabelVNode ? undefined : (label as string)"
-        :icon="icon || undefined"
+        :icon="(isLabelVNode && icon) ? undefined : (icon || undefined)"
         :icon-pos="iconPos"
         :severity="effectiveSeverity"
         :variant="variantProp"
@@ -70,7 +76,10 @@
         @click="openModal"
       >
         <template v-if="isLabelVNode">
-          <component :is="label" />
+          <span class="puck-button-block__slot" :class="`puck-button-block__slot--icon-${iconPos}`">
+            <i v-if="icon" :class="icon" class="puck-button-block__icon" aria-hidden="true" />
+            <component :is="label" />
+          </span>
         </template>
       </Button>
       <PuckModal
@@ -263,9 +272,47 @@ function onFormSubmit() {
 </script>
 
 <style scoped>
-.puck-button-block { padding: 8px 0; }
-/* PrimeVue Button handles styling; we only add spacing if needed */
-.puck-button-block__btn { margin: 0; }
+/* Wrapper inline agar tombol tidak meregang full width & layout tidak berantakan */
+.puck-button-block {
+  display: inline-block;
+  width: fit-content;
+  padding: 8px 0;
+  max-width: 100%;
+}
+/* PrimeVue Button: jangan potong teks/label saat ada icon */
+.puck-button-block__btn {
+  margin: 0;
+  overflow: visible;
+  white-space: nowrap;
+}
+/* Pastikan konten (icon + label) tidak terpotong */
+.puck-button-block :deep(button),
+.puck-button-block :deep(a) {
+  overflow: visible;
+}
+
+/* Slot custom (icon + label) saat edit di canvas – urutan ikon sesuai iconPos */
+.puck-button-block__slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.puck-button-block__slot--icon-left { flex-direction: row; }
+.puck-button-block__slot--icon-right { flex-direction: row-reverse; }
+.puck-button-block__slot--icon-top { flex-direction: column; }
+.puck-button-block__slot--icon-bottom { flex-direction: column-reverse; }
+.puck-button-block__icon {
+  flex-shrink: 0;
+  font-size: inherit;
+}
+/* Label (InlineTextEdit) jangan menyusut agar teks tidak terpotong */
+.puck-button-block__slot :deep(.puck-inline-text-edit) {
+  flex: 0 1 auto;
+  min-width: min-content;
+  overflow: visible;
+}
 
 .puck-button-block__modal-body :deep(p) { margin: 0 0 12px; }
 .puck-button-block__modal-body :deep(p:last-child) { margin-bottom: 0; }

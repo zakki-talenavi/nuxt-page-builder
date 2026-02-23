@@ -7,6 +7,7 @@
       'is-hovered': isHovered && !isSelected,
       'is-layout': isLayoutComponent,
       'is-dragging': isDragging,
+      'is-inline': isInlineComponent,
     }"
     :draggable="canDrag"
     @dragstart.stop="onDragStart"
@@ -201,6 +202,11 @@ function onDragEnd() {
 }
 
 const isLayoutComponent = computed(() => layoutType.value !== 'none')
+
+/** Komponen yang lebar mengikuti isi (tombol, dll) agar tidak meregang full width */
+const isInlineComponent = computed(() =>
+  ['Button'].includes(props.item.type)
+)
 
 const layoutType = computed<'multi-zone' | 'single-zone' | 'none'>(() => {
   const type = props.item.type
@@ -514,6 +520,10 @@ onBeforeUnmount(() => {
   opacity: 0.5;
   z-index: 10;
   pointer-events: none;
+}
+.puck-canvas-item.is-inline {
+  width: fit-content;
+  align-self: flex-start;
 }
 
 /* Toolbar (top: -36px) jangan tertutup item di bawah: item yang persis di atas item terpilih naik z-index */
