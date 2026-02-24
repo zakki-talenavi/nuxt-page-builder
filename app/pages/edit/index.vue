@@ -1,8 +1,9 @@
 <template>
-  <div>
-    <pre v-if="clientError" style="color:#ef4444;padding:1rem;white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;margin:1rem;">{{ clientError }}</pre>
-    <ClientOnly>
-      <Puck
+  <BuilderPageTabs>
+    <div>
+      <pre v-if="clientError" style="color:#ef4444;padding:1rem;white-space:pre-wrap;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;margin:1rem;">{{ clientError }}</pre>
+      <ClientOnly>
+        <Puck
         v-if="demo.data.value"
         :config="puckConfig"
         :data="demo.data.value"
@@ -13,7 +14,7 @@
       >
         <template #headerActions="{ path: headerPath }">
           <NuxtLink
-            :to="viewLink(headerPath)"
+            :to="viewLink(headerPath ?? '')"
             class="puck-btn puck-btn--outline"
             target="_blank"
             rel="noopener"
@@ -22,12 +23,13 @@
           </NuxtLink>
         </template>
       </Puck>
-      <div v-else class="puck-loading">Loading editor...</div>
-      <template #fallback>
-        <div class="puck-loading">Loading editor...</div>
-      </template>
-    </ClientOnly>
-  </div>
+        <div v-else class="puck-loading">Loading editor...</div>
+        <template #fallback>
+          <div class="puck-loading">Loading editor...</div>
+        </template>
+      </ClientOnly>
+    </div>
+  </BuilderPageTabs>
 </template>
 
 <script setup lang="ts">
