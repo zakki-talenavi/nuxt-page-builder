@@ -75,6 +75,25 @@ export const NODE_TYPE_DESCRIPTORS: NodeTypeDescriptor[] = [
     defaultConfig: { url: '', method: 'POST', headers: {}, body: '{}' },
   },
   {
+    type: 'approve_or_reject',
+    category: 'action',
+    label: 'Approval',
+    description: 'Approve or reject',
+    icon: 'pi-users',
+    defaultConfig: {
+      requestBy: 'email',
+      approvers: [''],
+      options: [
+        { id: 'approve', label: 'Approve', color: '#16a34a' },
+        { id: 'reject', label: 'Reject', color: '#dc2626' },
+        { id: 'revise', label: 'Revise', color: '#eab308' },
+      ],
+      approverInputs: [],
+      notificationSubject: '[Action required] Approve submission',
+      notificationBody: '',
+    },
+  },
+  {
     type: 'send_email',
     category: 'action',
     label: 'Send email',

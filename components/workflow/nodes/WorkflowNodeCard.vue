@@ -49,6 +49,30 @@
           </div>
         </div>
       </div>
+      <!-- Approval: satu tombol + handle per opsi (Approve, Reject, Revise, dll.) -->
+      <div v-else-if="isApprovalWithBranches" class="workflow-node-card__branches">
+        <div
+          v-for="opt in approvalOptions"
+          :key="opt.id"
+          class="workflow-node-card__branch"
+        >
+          <div
+            class="workflow-node-card__branch-btn"
+            :style="approvalOptionStyle(opt)"
+          >
+            {{ opt.label }}
+          </div>
+          <div class="workflow-node-card__branch-out">
+            <Handle
+              type="source"
+              :position="Position.Bottom"
+              :id="opt.id"
+              class="workflow-node-card__handle workflow-node-card__handle--branch"
+              :style="{ background: opt.color || '#94a3b8', boxShadow: `0 0 0 2px #fff, 0 0 0 3px ${opt.color || '#94a3b8'}` }"
+            />
+          </div>
+        </div>
+      </div>
       <!-- Single output handle for non-condition -->
       <div v-else class="workflow-node-card__out">
         <Handle type="source" :position="Position.Bottom" class="workflow-node-card__handle workflow-node-card__handle--out" />
@@ -80,6 +104,32 @@ const deleteNode = inject<((id: string) => void) | undefined>(WORKFLOW_DELETE_NO
 const isConditionWithBranches = computed(
   () => data.value?.category === 'condition' && data.value?.workflowNode?.type === 'if_else'
 )
+
+const isApprovalWithBranches = computed(
+  () => data.value?.category === 'action' && data.value?.workflowNode?.type === 'approve_or_reject'
+)
+
+interface ApprovalOption { id: string; label: string; color?: string }
+const approvalOptions = computed<ApprovalOption[]>(() => {
+  const opts = data.value?.workflowNode?.config?.options
+  if (!Array.isArray(opts) || opts.length === 0) {
+    return [
+      { id: 'approve', label: 'Approve', color: '#16a34a' },
+      { id: 'reject', label: 'Reject', color: '#dc2626' },
+      { id: 'revise', label: 'Revise', color: '#eab308' },
+    ]
+  }
+  return opts.filter((o: unknown) => o && typeof o === 'object' && 'id' in o && 'label' in o) as ApprovalOption[]
+})
+
+function approvalOptionStyle(opt: ApprovalOption) {
+  const c = opt.color || '#94a3b8'
+  return {
+    background: `${c}20`,
+    color: c,
+    border: `1px solid ${c}40`,
+  }
+}
 
 function onDeleteClick(e: Event) {
   e.stopPropagation()

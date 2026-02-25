@@ -96,10 +96,13 @@ function getIcon(type: string) {
   return getNodeDescriptor(type)?.icon
 }
 
-/** Warna edge berdasarkan cabang If/Else agar alur True/False terbaca */
+/** Warna edge berdasarkan cabang (If/Else True/False, Approval Approve/Reject/Revise) */
 function edgeStyle(sourceHandle: string | undefined | null) {
   if (sourceHandle === 'true') return { stroke: '#16a34a', strokeWidth: 2 }
   if (sourceHandle === 'false') return { stroke: '#dc2626', strokeWidth: 2 }
+  if (sourceHandle === 'approve') return { stroke: '#16a34a', strokeWidth: 2 }
+  if (sourceHandle === 'reject') return { stroke: '#dc2626', strokeWidth: 2 }
+  if (sourceHandle === 'revise') return { stroke: '#eab308', strokeWidth: 2 }
   return { stroke: '#94a3b8', strokeWidth: 2 }
 }
 

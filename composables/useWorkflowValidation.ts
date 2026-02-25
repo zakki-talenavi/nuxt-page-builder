@@ -16,15 +16,15 @@ export function useWorkflowValidation() {
     const { nodes, edges } = workflow
     const nodeIds = new Set(nodes.map((n) => n.id))
 
-    // Exactly one trigger as entry point (trigger node with no incoming edges)
+    // Exactly one trigger: entry (no incoming) atau satu-satunya trigger (boleh ada edge masuk, e.g. Revise → Form submitted)
     const isTriggerType = (n: WorkflowNode) =>
       ['form_submitted', 'schedule_cron', 'webhook_received', 'manual_trigger'].includes(n.type)
     const targets = new Set(edges.map((e) => e.target))
-    const entryTriggers = nodes.filter((n) => isTriggerType(n) && !targets.has(n.id))
-    if (entryTriggers.length === 0) {
+    const allTriggers = nodes.filter((n) => isTriggerType(n))
+    const entryTriggers = allTriggers.filter((n) => !targets.has(n.id))
+    if (allTriggers.length === 0) {
       errors.push({ code: 'NO_TRIGGER', message: 'Workflow harus memiliki tepat satu node trigger.' })
-    }
-    if (entryTriggers.length > 1) {
+    } else if (entryTriggers.length > 1) {
       errors.push({ code: 'MULTIPLE_TRIGGERS', message: 'Hanya boleh ada satu node trigger.' })
     }
 
@@ -46,13 +46,17 @@ export function useWorkflowValidation() {
       }
     }
 
-    // No cycles (DFS)
-    const triggerId = entryTriggers[0]?.id
+    // No cycles (DFS) — root = entry trigger, atau satu-satunya trigger jika ada edge masuk (loop back)
+    const triggerId = entryTriggers[0]?.id ?? (allTriggers.length === 1 ? allTriggers[0]?.id : undefined)
     if (triggerId && nodes.length > 0) {
       const visited = new Set<string>()
       const stack = new Set<string>()
       function visit(id: string): boolean {
-        if (stack.has(id)) return true // cycle
+        if (stack.has(id)) {
+          // Loop kembali ke trigger (e.g. Revise → Form submitted) diperbolehkan
+          if (id === triggerId) return false
+          return true // cycle lain
+        }
         if (visited.has(id)) return false
         visited.add(id)
         stack.add(id)
@@ -65,7 +69,7 @@ export function useWorkflowValidation() {
         stack.delete(id)
         return false
       }
-      if (visit(triggerId)) {
+      if (triggerId && visit(triggerId)) {
         errors.push({ code: 'CYCLE', message: 'Graph tidak boleh memiliki cycle (DAG).' })
       }
       // All nodes reachable from trigger
