@@ -16,14 +16,15 @@ export function useWorkflowValidation() {
     const { nodes, edges } = workflow
     const nodeIds = new Set(nodes.map((n) => n.id))
 
-    // Exactly one trigger
-    const triggers = nodes.filter((n) =>
+    // Exactly one trigger as entry point (trigger node with no incoming edges)
+    const isTriggerType = (n: WorkflowNode) =>
       ['form_submitted', 'schedule_cron', 'webhook_received', 'manual_trigger'].includes(n.type)
-    )
-    if (triggers.length === 0) {
+    const targets = new Set(edges.map((e) => e.target))
+    const entryTriggers = nodes.filter((n) => isTriggerType(n) && !targets.has(n.id))
+    if (entryTriggers.length === 0) {
       errors.push({ code: 'NO_TRIGGER', message: 'Workflow harus memiliki tepat satu node trigger.' })
     }
-    if (triggers.length > 1) {
+    if (entryTriggers.length > 1) {
       errors.push({ code: 'MULTIPLE_TRIGGERS', message: 'Hanya boleh ada satu node trigger.' })
     }
 
@@ -46,7 +47,7 @@ export function useWorkflowValidation() {
     }
 
     // No cycles (DFS)
-    const triggerId = triggers[0]?.id
+    const triggerId = entryTriggers[0]?.id
     if (triggerId && nodes.length > 0) {
       const visited = new Set<string>()
       const stack = new Set<string>()

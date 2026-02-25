@@ -178,7 +178,11 @@ onMounted(() => {
   }
   workflowStore.loadFromStorage()
   const w = workflowStore.workflows.find((x: WorkflowDefinition) => x.id === id.value) ?? null
-  workflowStore.setCurrent(w ? { ...w } : null)
+  if (w) {
+    workflowStore.setCurrent(w)
+  } else {
+    workflowStore.setCurrent(null)
+  }
 })
 
 function saveWorkflow() {

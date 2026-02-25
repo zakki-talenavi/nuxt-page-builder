@@ -96,6 +96,18 @@ function getIcon(type: string) {
   return getNodeDescriptor(type)?.icon
 }
 
+/** Warna edge berdasarkan cabang If/Else agar alur True/False terbaca */
+function edgeStyle(sourceHandle: string | undefined | null) {
+  if (sourceHandle === 'true') return { stroke: '#16a34a', strokeWidth: 2 }
+  if (sourceHandle === 'false') return { stroke: '#dc2626', strokeWidth: 2 }
+  return { stroke: '#94a3b8', strokeWidth: 2 }
+}
+
+function toFlowEdgesWithStyle(nodes: WorkflowNode[], edges: WorkflowEdge[]) {
+  const { edges: raw } = toVueFlow(nodes, edges, getLabel, getDesc, getCategory, getIcon)
+  return raw.map((e) => ({ ...e, style: edgeStyle(e.sourceHandle) }))
+}
+
 const flowState = toVueFlow(
   props.nodes,
   props.edges,
@@ -105,14 +117,14 @@ const flowState = toVueFlow(
   getIcon
 )
 const flowNodes = ref(flowState.nodes)
-const flowEdges = ref(flowState.edges)
+const flowEdges = ref(toFlowEdgesWithStyle(props.nodes, props.edges))
 
 watch(
   () => [props.nodes, props.edges],
   () => {
     const next = toVueFlow(props.nodes, props.edges, getLabel, getDesc, getCategory, getIcon)
     flowNodes.value = next.nodes
-    flowEdges.value = next.edges
+    flowEdges.value = toFlowEdgesWithStyle(props.nodes, props.edges)
   },
   { deep: true }
 )

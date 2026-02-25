@@ -6,7 +6,7 @@
       { 'workflow-node-card--selected': selected }
     ]"
   >
-    <Handle type="target" :position="Position.Left" class="workflow-node-card__handle workflow-node-card__handle--in" />
+    <Handle type="target" :position="Position.Top" class="workflow-node-card__handle workflow-node-card__handle--in" />
     <div class="workflow-node-card__body">
       <div class="workflow-node-card__header">
         <div class="workflow-node-card__icon-wrap">
@@ -35,20 +35,23 @@
           </button>
         </div>
       </div>
-      <!-- Branch pills for condition (if_else) -->
       <div v-if="isConditionWithBranches" class="workflow-node-card__branches">
         <div class="workflow-node-card__branch workflow-node-card__branch--true">
-          <Handle type="source" :position="Position.Right" id="true" class="workflow-node-card__handle workflow-node-card__handle--branch" />
-          <span>True</span>
+          <div class="workflow-node-card__branch-btn">True</div>
+          <div class="workflow-node-card__branch-out">
+            <Handle type="source" :position="Position.Bottom" id="true" class="workflow-node-card__handle workflow-node-card__handle--branch workflow-node-card__handle--branch-true" />
+          </div>
         </div>
         <div class="workflow-node-card__branch workflow-node-card__branch--false">
-          <Handle type="source" :position="Position.Right" id="false" class="workflow-node-card__handle workflow-node-card__handle--branch" />
-          <span>False</span>
+          <div class="workflow-node-card__branch-btn">False</div>
+          <div class="workflow-node-card__branch-out">
+            <Handle type="source" :position="Position.Bottom" id="false" class="workflow-node-card__handle workflow-node-card__handle--branch workflow-node-card__handle--branch-false" />
+          </div>
         </div>
       </div>
       <!-- Single output handle for non-condition -->
       <div v-else class="workflow-node-card__out">
-        <Handle type="source" :position="Position.Right" class="workflow-node-card__handle workflow-node-card__handle--out" />
+        <Handle type="source" :position="Position.Bottom" class="workflow-node-card__handle workflow-node-card__handle--out" />
       </div>
     </div>
   </div>
@@ -195,30 +198,50 @@ function onDeleteClick(e: Event) {
 }
 .workflow-node-card__branches {
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #f1f5f9;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
 }
 .workflow-node-card__branch {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  gap: 0;
   position: relative;
+  min-width: 0;
 }
-.workflow-node-card__branch--true {
+/* Tombol cabang (seperti Approve/Reject di Approval) */
+.workflow-node-card__branch-btn {
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  cursor: default;
+}
+.workflow-node-card__branch--true .workflow-node-card__branch-btn {
   background: #dcfce7;
   color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
-.workflow-node-card__branch--false {
+.workflow-node-card__branch--false .workflow-node-card__branch-btn {
   background: #fee2e2;
   color: #dc2626;
+  border: 1px solid #fecaca;
+}
+/* Baris titik koneksi di bawah tombol (seperti + di bawah Approve/Reject) */
+.workflow-node-card__branch-out {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 0;
+  position: relative;
 }
 .workflow-node-card__out {
   margin-top: 8px;
@@ -236,19 +259,29 @@ function onDeleteClick(e: Event) {
   box-shadow: 0 0 0 1px #94a3b8;
 }
 .workflow-node-card__handle--in {
-  left: -6px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%);
 }
 .workflow-node-card__handle--out {
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 50%;
+  bottom: -6px;
+  top: auto;
+  transform: translateX(-50%);
 }
 .workflow-node-card__handle--branch {
-  position: absolute;
-  right: -4px;
-  top: 50%;
-  transform: translateY(-50%);
+  flex-shrink: 0;
+  position: relative;
+  right: 0;
+  top: 0;
+  transform: none;
+}
+.workflow-node-card__handle--branch-true {
+  background: #16a34a;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #16a34a;
+}
+.workflow-node-card__handle--branch-false {
+  background: #dc2626;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #dc2626;
 }
 </style>
