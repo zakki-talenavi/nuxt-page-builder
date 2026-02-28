@@ -9,6 +9,7 @@ import { navigationComponents } from './blocks/navigation'
 import { actionsComponents } from './blocks/actions'
 import { sectionsComponents } from './blocks/sections'
 import { dataComponents } from './blocks/data'
+import { chartComponents } from './blocks/chart'
 import { mediaComponents } from './blocks/media'
 
 /** Used for localStorage key (per-path data). Change when config shape changes. */
@@ -21,7 +22,7 @@ const categories = {
   navigation: { title: 'Navigation', components: ['Breadcrumb'] },
   actions: { title: 'Actions', components: ['Button'] },
   sections: { title: 'Sections', components: ['Hero', 'Card', 'Stats', 'Logos'] },
-  data: { title: 'Data', components: ['DataTable'] },
+  data: { title: 'Data', components: ['DataTable', 'Chart'] },
   media: { title: 'Media', components: ['Image', 'Divider', 'Blank'] },
 }
 
@@ -34,6 +35,7 @@ const components = Object.assign(
   actionsComponents,
   sectionsComponents,
   dataComponents,
+  chartComponents,
   mediaComponents,
 )
 
